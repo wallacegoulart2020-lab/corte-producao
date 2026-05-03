@@ -9,27 +9,16 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #06080d;
-      --glass: rgba(18, 23, 31, 0.65);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-hover: rgba(18, 23, 31, 0.8);
-      --primary: #5c9eff;
-      --primary-dark: #3e7fd9;
-      --danger: #ff506e;
-      --success: #00e6a0;
-      --warning: #ffb347;
-      --text: #e8ecf2;
-      --text-secondary: #94a3b8;
-      --border: rgba(255, 255, 255, 0.06);
-      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      --radius: 16px;
-      --radius-sm: 10px;
-      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --bg: #06080d; --glass: rgba(18, 23, 31, 0.65); --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-hover: rgba(18, 23, 31, 0.8); --primary: #5c9eff; --primary-dark: #3e7fd9;
+      --danger: #ff506e; --success: #00e6a0; --warning: #ffb347; --text: #e8ecf2;
+      --text-secondary: #94a3b8; --border: rgba(255, 255, 255, 0.06); --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --radius: 16px; --radius-sm: 10px; --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
     body {
       font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--bg); color: var(--text); line-height: 1.5;
-      min-height: 100dvh; overflow-x: hidden;
+      background: var(--bg); color: var(--text);
+      line-height: 1.5; min-height: 100dvh; overflow-x: hidden;
     }
     body::before {
       content: ''; position: fixed; inset: 0; z-index: 0;
@@ -40,8 +29,6 @@
     }
     @keyframes bgPulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
     .hidden { display: none !important; }
-
-    /* LOADING */
     .loading-screen { position: fixed; inset: 0; background: #06090f; display: flex; align-items: center; justify-content: center; z-index: 9999; }
     .loading-logo { text-align: center; }
     .loading-icon { font-size: 48px; margin-bottom: 12px; animation: pulse 1.8s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(92,158,255,0.6)); }
@@ -53,14 +40,12 @@
 
     .app { max-width: 640px; margin: 0 auto; padding: 16px; padding-bottom: 40px; position: relative; z-index: 1; }
 
-    /* HEADER */
     .header {
       display: flex; align-items: center; justify-content: space-between;
       background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       padding: 14px 20px; border-radius: var(--radius);
       box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
-      margin-bottom: 16px; position: sticky; top: 8px; z-index: 100;
-      border: 1px solid var(--glass-border);
+      margin-bottom: 16px; position: sticky; top: 8px; z-index: 100; border: 1px solid var(--glass-border);
     }
     .header-left { display: flex; align-items: center; gap: 12px; }
     .header-icon { font-size: 30px; filter: drop-shadow(0 0 8px #5c9eff); }
@@ -74,16 +59,14 @@
     }
     .btn-dados:hover { background: rgba(92,158,255,0.25); box-shadow: 0 0 20px rgba(92,158,255,0.3); transform: translateY(-1px); }
 
-    /* ALERT */
     .alert-banner {
-      display: flex; align-items: center; gap: 10px; padding: 12px 16px;
-      border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 13px;
-      background: rgba(255,179,71,0.12); color: #ffb347; border: 1px solid rgba(255,179,71,0.3);
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 12px;
+      font-size: 13px; background: rgba(255,179,71,0.12); color: #ffb347;
+      border: 1px solid rgba(255,179,71,0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     }
     .alert-close { margin-left: auto; background: none; border: none; cursor: pointer; font-size: 16px; color: inherit; }
 
-    /* FORM SECTIONS */
     .form-section {
       background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border-radius: var(--radius); box-shadow: var(--shadow);
@@ -101,19 +84,17 @@
     .form-group.full-width { grid-column: 1 / -1; }
     .form-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.2px; }
     .form-label.required::after { content: ' *'; color: var(--danger); }
+
     .form-input {
       width: 100%; padding: 10px 12px; border: 1px solid var(--glass-border);
       border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
-      background: rgba(255,255,255,0.03); color: var(--text);
-      transition: all var(--transition);
+      background: rgba(255,255,255,0.03); color: var(--text); transition: all var(--transition);
     }
     .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(92,158,255,0.15); }
     .form-input::placeholder { color: #4a5568; }
 
-    /* NATIVE SELECT HIDDEN */
     select.form-select { position: absolute; opacity: 0; pointer-events: none; height: 0; width: 0; }
 
-    /* CUSTOM SELECT BUTTON */
     .custom-select-btn {
       width: 100%; padding: 10px 30px 10px 12px; border: 1px solid var(--glass-border);
       border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
@@ -122,12 +103,10 @@
       position: relative; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     }
     .custom-select-btn:hover { border-color: rgba(92,158,255,0.4); background: rgba(255,255,255,0.05); }
-    .custom-select-btn:active { transform: scale(0.98); }
     .custom-select-btn::after {
       content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
       color: var(--text-secondary); font-size: 12px; transition: transform 0.3s;
     }
-    .custom-select-btn.open::after { transform: translateY(-50%) rotate(180deg); }
     .custom-select-btn.placeholder { color: #4a5568; }
 
     .select-add-wrapper { display: flex; gap: 6px; }
@@ -140,7 +119,6 @@
     }
     .btn-add-item:hover { background: rgba(92,158,255,0.2); box-shadow: 0 0 12px rgba(92,158,255,0.3); }
 
-    /* DATE */
     .date-input-wrapper { position: relative; display: flex; }
     .date-input-wrapper .form-input { padding-right: 38px; }
     .date-toggle-btn {
@@ -148,6 +126,7 @@
       background: none; border: none; font-size: 16px; cursor: pointer; padding: 4px 8px; opacity: 0.7;
     }
     .date-toggle-btn:hover { opacity: 1; }
+
     .calendar-popup {
       position: absolute; top: calc(100% + 4px); left: 0; z-index: 400;
       background: var(--glass-hover); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -161,15 +140,15 @@
     .calendar-popup .cal-day:hover { background: rgba(92,158,255,0.15); }
     .calendar-popup .cal-day.today { border: 1px solid var(--primary); color: var(--primary); font-weight: 600; }
 
-    /* SUBMIT */
     .form-submit-area { margin-top: 20px; display: flex; justify-content: center; }
     .btn-submit {
-      display: flex; align-items: center; gap: 8px; padding: 14px 36px;
-      background: rgba(0,230,160,0.08); color: var(--success);
-      border: 2px solid rgba(0,230,160,0.5); border-radius: 30px;
-      font-size: 15px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-      cursor: pointer; box-shadow: 0 0 20px rgba(0,230,160,0.15);
-      transition: all 0.35s ease; position: relative; overflow: hidden;
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 36px; background: rgba(0,230,160,0.08);
+      color: var(--success); border: 2px solid rgba(0,230,160,0.5);
+      border-radius: 30px; font-size: 15px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; cursor: pointer;
+      box-shadow: 0 0 20px rgba(0,230,160,0.15); transition: all 0.35s ease;
+      position: relative; overflow: hidden;
     }
     .btn-submit::after {
       content: ''; position: absolute; top: 50%; left: 50%; width: 300%; height: 300%;
@@ -181,14 +160,12 @@
     .btn-submit-icon { font-size: 18px; position: relative; z-index: 1; }
     .btn-submit span { position: relative; z-index: 1; }
 
-    /* RECORDS */
     .my-records { background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-top: 16px; border: 1px solid var(--glass-border); }
     .btn-close-records { background: none; border: none; cursor: pointer; font-size: 18px; margin-left: auto; color: var(--text-secondary); }
     .records-list { max-height: 400px; overflow-y: auto; margin-top: 12px; }
     .record-item { padding: 12px; border: 1px solid var(--glass-border); border-radius: var(--radius-sm); margin-bottom: 8px; cursor: pointer; transition: var(--transition); font-size: 13px; background: rgba(255,255,255,0.02); }
     .record-item:hover { border-color: var(--primary-dark); background: rgba(92,158,255,0.05); }
 
-    /* MODALS */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000;
       display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -222,16 +199,8 @@
     .btn-danger { background: rgba(255,80,110,0.15); color: var(--danger); border: 1px solid rgba(255,80,110,0.4); }
     .btn-danger:hover { background: rgba(255,80,110,0.3); box-shadow: 0 0 16px rgba(255,80,110,0.3); }
 
-    /* SELECT MODAL (custom) */
-    .select-modal-content {
-      max-height: 60vh; overflow-y: auto; margin: 8px 0;
-      display: flex; flex-direction: column; gap: 2px;
-    }
-    .select-option {
-      padding: 12px 16px; border-radius: var(--radius-sm); cursor: pointer;
-      transition: var(--transition); color: var(--text); font-size: 14px;
-      border: 1px solid transparent;
-    }
+    .select-modal-content { max-height: 60vh; overflow-y: auto; margin: 8px 0; display: flex; flex-direction: column; gap: 2px; }
+    .select-option { padding: 12px 16px; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); color: var(--text); font-size: 14px; border: 1px solid transparent; }
     .select-option:hover, .select-option.active { background: rgba(92,158,255,0.12); border-color: rgba(92,158,255,0.2); }
     .select-option.selected { background: rgba(0,230,160,0.12); border-color: rgba(0,230,160,0.3); color: var(--success); }
 
@@ -240,7 +209,6 @@
     .item-row:last-child { border-bottom: none; }
     .item-remove { color: var(--danger); cursor: pointer; background: none; border: none; font-size: 14px; }
 
-    /* DASHBOARD */
     .dashboard-filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
     .filter-group { display: flex; flex-direction: column; gap: 4px; }
     .dashboard-stats { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; font-size: 13px; color: var(--text-secondary); flex-wrap: wrap; }
@@ -268,6 +236,15 @@
       .header { flex-wrap: wrap; gap: 8px; }
       .btn-dados { margin-left: auto; }
       .modal { padding: 16px; }
+    }
+
+    @media (min-width: 768px) {
+      .app { max-width: 1400px; width: 95%; padding: 24px 32px; }
+      .form-grid { grid-template-columns: repeat(3, 1fr); }
+      .form-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+      .header { padding: 18px 28px; }
+      .header-title { font-size: 20px; }
+      .btn-dados { font-size: 14px; padding: 10px 22px; }
     }
   </style>
 </head>
@@ -385,14 +362,9 @@
     </div>
   </div>
 
-  <!-- Modal de seleção customizado -->
   <div id="modal-select" class="modal-overlay hidden">
     <div class="modal">
-      <div class="modal-header">
-        <span class="modal-icon" id="modal-select-icon">📋</span>
-        <h3 id="modal-select-title">Selecionar</h3>
-        <button class="modal-close-btn" onclick="closeSelectModal()">✕</button>
-      </div>
+      <div class="modal-header"><span class="modal-icon">📋</span><h3 id="modal-select-title">Selecionar</h3><button class="modal-close-btn" onclick="closeSelectModal()">✕</button></div>
       <div id="modal-select-content" class="select-modal-content"></div>
     </div>
   </div>
@@ -408,18 +380,6 @@
       <button class="btn-primary" style="width:100%;margin-bottom:12px;" onclick="addManageItem()">➕ Adicionar</button>
       <div id="manage-item-list" class="item-list"></div>
       <div class="modal-actions"><button class="btn-secondary" onclick="closeManageItemsModal()">Fechar</button></div>
-    </div>
-  </div>
-
-  <div id="modal-password" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-header"><span class="modal-icon">🔒</span><h3>Acesso Restrito</h3></div>
-      <p class="modal-desc">Digite a senha para continuar.</p>
-      <input type="password" id="modal-password-input" class="form-input" placeholder="••••••">
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="closePasswordModal()">Cancelar</button>
-        <button class="btn-primary" onclick="confirmPassword()">Confirmar</button>
-      </div>
     </div>
   </div>
 
@@ -463,7 +423,44 @@
   <div id="toast" class="toast hidden"></div>
 
   <script>
-    // ========== CONFIGURAÇÃO (mantida igual) ==========
+    const SUPABASE_URL = "https://ctuwpdtksivutnhtxezm.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dXdwZHRrc2l2dXRuaHR4ZXptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NDE2MTMsImV4cCI6MjA5MzMxNzYxM30._Odu5T16aSXeC7fzr1DBdHpStZhDlWI-kgABLMl2bGY";
+
+    const headers = {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+    };
+
+    async function sbFetch(path, options = {}) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1${path}`, {
+        ...options,
+        headers: { ...headers, ...(options.headers || {}) }
+      });
+      if (!res.ok) { const err = await res.text(); throw new Error(err); }
+      if (res.status === 204) return null;
+      return res.json();
+    }
+
+    const FIELD_MAP = {
+      "enchedora": "enchedora", "medidor-vazao": "medidorVazao",
+      "chk1-t": "stratecTotalL1", "chk1-b": "stratecBoasL1", "chk1-m": "stratecMalL1",
+      "bb1-tl1": "bbullTotalL1", "bb1-bl1": "bbullBoasL1", "bb1-ml1": "bbullMalL1",
+      "chk2-t": "stratecTotalL2", "chk2-b": "stratecBoasL2", "chk2-m": "stratecMalL2",
+      "bb1-tl2": "bbullTotalL2", "bb1-bl2": "bbullBoasL2", "bb1-ml2": "bbullMalL2",
+      "ic1-t": "totalChk1", "ic1-b": "boasChk1", "ic1-m": "malChk1",
+      "is1-t": "totalStratec1", "is1-b": "boasStratec1", "is1-m": "malStratec1",
+      "ic2-t": "totalChk2", "ic2-b": "boasChk2", "ic2-m": "malChk2",
+      "is2-t": "totalStratec2", "is2-b": "boasStratec2", "is2-m": "malStratec2",
+      "ih-t": "totalHelf", "ih-b": "boasHelf", "ih-m": "malHelf",
+      "ib-t": "totalBbull", "ib-b": "boasBbull", "ib-m": "malBbull",
+      "khs-p": "khsPacotes", "pl05": "pl05", "pl06": "pl06", "fracao512": "fracao",
+      "khs-p2": "khsPacotes", "em3": "epcMead3", "em4": "epcMead4",
+      "pl09": "pl09", "pl10": "pl10", "fracao513": "fracao513",
+      "epc-m": "epcMead", "epc-p": "epcPackmatic",
+      "pl3": "pl3", "pl4": "pl4", "fracao-pl": "fracaoPl"
+    };
+
     const LINHA_CONFIG = {
       L512: {
         label: 'L512',
@@ -506,35 +503,28 @@
         }
       }
     };
+
     let PRODUTOS = JSON.parse(localStorage.getItem('produtos_list') || 'null') || ['1 - Antarctica 350ml','2 - Antarctica 269ml','3 - Skol 350ml','4 - Skol 269ml','5 - Brahma 350ml','6 - Brahma 269ml','7 - Brahma Duplo Malte 350ml','9 - Budweiser 350ml','10 - Budweiser 269ml','11 - Spaten 350ml','12 - Spaten 269ml','13 - Original 350ml','14 - Original 269ml','15 - Bohemia 350ml','16 - Bohemia 269ml','19 - Caracu 350ml','20 - Subzero 350ml','22 - Beats Senses 269ml','23 - Beats GT 269ml','24 - Beats Tropical 269ml','25 - Beats Caipirinha 350ml','27 - Red Mix 269ml','33 - Brutal Long Neck'];
     let EMBALAGENS = JSON.parse(localStorage.getItem('embalagens_list') || 'null') || ['Pack 8 Latas','Pack 12 Latas','Pack 12 Latas (Box/Papelão)','Pack 15 Latas','Pack 18 Latas'];
     let currentLinha = null, currentFuncao = null;
-    let records = JSON.parse(localStorage.getItem('corte_producao') || '[]');
-    let manageTab = 'produtos';
+    let allRecords = [];
     let filteredRecords = [];
-    let activeSelectEl = null; // select sendo editado no modal
+    let manageTab = 'produtos';
+    let activeSelectEl = null;
 
-    // ========== CUSTOM SELECT SYSTEM ==========
     function buildCustomSelects() {
       document.querySelectorAll('select.form-select').forEach(select => {
-        // Verifica se já tem botão customizado
         const wrapper = select.closest('.custom-select-wrapper');
         if (!wrapper) return;
-        // Remove botão antigo se existir
         const oldBtn = wrapper.querySelector('.custom-select-btn');
         if (oldBtn) oldBtn.remove();
-        // Cria botão
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'custom-select-btn';
         const selectedOption = select.options[select.selectedIndex];
         btn.textContent = selectedOption && selectedOption.value ? selectedOption.textContent : (select.dataset.placeholder || 'Selecione...');
         if (!selectedOption || !selectedOption.value) btn.classList.add('placeholder');
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          openSelectModal(select);
-        });
+        btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openSelectModal(select); });
         wrapper.appendChild(btn);
       });
     }
@@ -544,33 +534,24 @@
       const options = Array.from(selectEl.options);
       const title = selectEl.dataset.placeholder || selectEl.closest('.form-group')?.querySelector('.form-label')?.textContent || 'Selecionar';
       document.getElementById('modal-select-title').textContent = title;
-      document.getElementById('modal-select-icon').textContent = '📋';
       const content = document.getElementById('modal-select-content');
       const currentValue = selectEl.value;
       content.innerHTML = options.map(opt => {
         const isSelected = opt.value === currentValue;
         const isEmpty = opt.value === '';
-        return `<div class="select-option${isSelected ? ' selected' : ''}" data-value="${opt.value}" data-text="${opt.textContent}">
-          ${isEmpty ? '〈nenhum〉' : opt.textContent}
-        </div>`;
+        return `<div class="select-option${isSelected ? ' selected' : ''}" data-value="${opt.value}" data-text="${opt.textContent}">${isEmpty ? '〈nenhum〉' : opt.textContent}</div>`;
       }).join('');
-      // Event listeners
       content.querySelectorAll('.select-option').forEach(div => {
         div.addEventListener('click', () => {
-          const val = div.dataset.value;
-          const txt = div.dataset.text;
-          // Atualiza select nativo
-          selectEl.value = val;
-          // Atualiza botão customizado
+          selectEl.value = div.dataset.value;
           const wrapper = selectEl.closest('.custom-select-wrapper');
           if (wrapper) {
             const btn = wrapper.querySelector('.custom-select-btn');
             if (btn) {
-              btn.textContent = val ? txt : (selectEl.dataset.placeholder || 'Selecione...');
-              if (!val) btn.classList.add('placeholder'); else btn.classList.remove('placeholder');
+              btn.textContent = div.dataset.value ? div.dataset.text : (selectEl.dataset.placeholder || 'Selecione...');
+              if (!div.dataset.value) btn.classList.add('placeholder'); else btn.classList.remove('placeholder');
             }
           }
-          // Dispara evento change
           selectEl.dispatchEvent(new Event('change', { bubbles: true }));
           closeSelectModal();
         });
@@ -578,32 +559,47 @@
       document.getElementById('modal-select').classList.remove('hidden');
     }
 
-    function closeSelectModal() {
-      document.getElementById('modal-select').classList.add('hidden');
-      activeSelectEl = null;
+    function closeSelectModal() { document.getElementById('modal-select').classList.add('hidden'); activeSelectEl = null; }
+
+    async function loadAllRecords() {
+      try {
+        const records = await sbFetch("/registros?order=savado_em.desc");
+        allRecords = records.map(r => ({ id: r.id, ...r }));
+      } catch (e) {
+        console.error('Erro ao carregar registros:', e);
+        allRecords = [];
+      }
     }
 
-    // Fechar modal de seleção ao clicar fora
-    document.addEventListener('click', (e) => {
-      const modal = document.getElementById('modal-select');
-      if (!modal.classList.contains('hidden') && e.target === modal) {
-        closeSelectModal();
-      }
-    });
+    async function saveRecord(data) {
+      const row = {};
+      row.dados = data.data;
+      row.seuNome = data.seuNome;
+      row.turno = data.turno;
+      row.linha = data.linha;
+      row.produto = data.produto;
+      row.embalagem = data.embalagem;
+      row["máquina"] = data.funcao;
+      row.savado_em = new Date().toISOString();
+      Object.entries(data.dyn).forEach(([key, value]) => {
+        const col = FIELD_MAP[key] || key;
+        row[col] = value;
+      });
+      await sbFetch("/registros", {
+        method: "POST",
+        headers: { "Prefer": "return=representation" },
+        body: JSON.stringify(row)
+      });
+    }
 
-    // ========== INICIALIZAÇÃO ==========
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => { document.getElementById('loading-screen').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); }, 700);
       const hoje = new Date();
       document.getElementById('data').value = hoje.toLocaleDateString('pt-BR');
       document.getElementById('header-date').textContent = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
       populateSelect('produto', PRODUTOS);
       populateSelect('embalagem', EMBALAGENS);
-
-      // Constrói custom selects iniciais
       buildCustomSelects();
-
       document.getElementById('linha').addEventListener('change', onLinhaChange);
       document.getElementById('funcao').addEventListener('change', onFuncaoChange);
       document.getElementById('production-form').addEventListener('submit', onSubmit);
@@ -613,19 +609,15 @@
       document.getElementById('btn-add-produto').addEventListener('click', () => { manageTab = 'produtos'; openManageItemsModal(); });
       document.getElementById('btn-add-embalagem').addEventListener('click', () => { manageTab = 'embalagens'; openManageItemsModal(); });
       document.getElementById('dynamic-sections').innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>';
-
       let titleClicks = 0, titleTimer = null;
       document.getElementById('header-title').addEventListener('click', () => {
         titleClicks++;
         if (titleClicks === 1) { titleTimer = setTimeout(() => { titleClicks = 0; }, 1500); }
         else if (titleClicks === 3) { clearTimeout(titleTimer); titleClicks = 0; manageTab = 'produtos'; openManageItemsModal(); }
       });
-
       document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.add('hidden'); }));
       document.addEventListener('click', (e) => { if (!e.target.closest('.date-input-wrapper')) document.querySelectorAll('.calendar-popup').forEach(c => c.classList.add('hidden')); });
-
-      // Reconstruir custom selects após popular
-      setTimeout(buildCustomSelects, 100);
+      await loadAllRecords();
     });
 
     function populateSelect(id, items) {
@@ -633,18 +625,17 @@
       const placeholder = id === 'produto' ? 'Selecione o produto' : 'Selecione a embalagem';
       s.innerHTML = `<option value="">${placeholder}</option>`;
       items.forEach(i => { const o = document.createElement('option'); o.value = i; o.textContent = i; s.appendChild(o); });
-      // Reconstruir botão customizado
-      setTimeout(() => {
-        const wrapper = s.closest('.custom-select-wrapper');
-        if (wrapper) {
-          const btn = wrapper.querySelector('.custom-select-btn');
-          if (btn) btn.remove();
-          buildCustomSelects();
-        }
-      }, 50);
+      setTimeout(buildCustomSelects, 50);
     }
 
-    function onLinhaChange(e) { currentLinha = e.target.value; document.getElementById('funcao').value = ''; currentFuncao = null; buildCustomSelects(); document.getElementById('dynamic-sections').innerHTML = currentLinha ? '<p class="info-text">Agora selecione <strong>Qual sua Máquina?</strong></p>' : '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>'; }
+    function onLinhaChange(e) {
+      currentLinha = e.target.value;
+      document.getElementById('funcao').value = '';
+      currentFuncao = null;
+      buildCustomSelects();
+      document.getElementById('dynamic-sections').innerHTML = currentLinha ? '<p class="info-text">Agora selecione <strong>Qual sua Máquina?</strong></p>' : '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>';
+    }
+
     function onFuncaoChange(e) { currentFuncao = e.target.value; renderDynamicSections(); }
 
     function renderDynamicSections() {
@@ -660,19 +651,24 @@
       container.innerHTML = html;
     }
 
-    function onSubmit(e) {
+    async function onSubmit(e) {
       e.preventDefault();
       const data = document.getElementById('data').value, seuNome = document.getElementById('seu-nome').value.trim(), turno = document.getElementById('turno').value, linha = document.getElementById('linha').value, produto = document.getElementById('produto').value, embalagem = document.getElementById('embalagem').value, funcao = document.getElementById('funcao').value;
       if (!data || !seuNome || !turno || !linha || !produto || !embalagem || !funcao) { showAlert('Preencha todos os campos obrigatórios.'); return; }
       const dyn = {}; document.querySelectorAll('#dynamic-sections input').forEach(i => { if (i.value) dyn[i.name || i.id] = i.value; });
-      records.unshift({ id: Date.now(), timestamp: new Date().toISOString(), data, seuNome, turno, linha, produto, embalagem, funcao, ...dyn });
-      localStorage.setItem('corte_producao', JSON.stringify(records));
-      showToast('Registro salvo! ✅');
-      document.getElementById('production-form').reset();
-      document.getElementById('data').value = new Date().toLocaleDateString('pt-BR');
-      document.getElementById('dynamic-sections').innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>';
-      currentLinha = null; currentFuncao = null;
-      buildCustomSelects();
+      try {
+        await saveRecord({ data, seuNome, turno, linha, produto, embalagem, funcao, dyn });
+        await loadAllRecords();
+        showToast('Registro salvo! ✅');
+        document.getElementById('production-form').reset();
+        document.getElementById('data').value = new Date().toLocaleDateString('pt-BR');
+        document.getElementById('dynamic-sections').innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>';
+        currentLinha = null; currentFuncao = null;
+        buildCustomSelects();
+      } catch (e) {
+        showToast('Erro ao salvar. Tente novamente.');
+        console.error(e);
+      }
     }
 
     function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 2500); }
@@ -700,14 +696,40 @@
     function renderManageList() { const list = manageTab === 'produtos' ? PRODUTOS : EMBALAGENS; document.getElementById('manage-item-list').innerHTML = list.map((item, i) => `<div class="item-row"><span>${item}</span><button class="item-remove" onclick="removeManageItem(${i})">✕</button></div>`).join(''); }
     function addManageItem() { const v = document.getElementById('new-manage-item-input').value.trim(); if (!v) return; if (manageTab === 'produtos') { PRODUTOS.push(v); localStorage.setItem('produtos_list', JSON.stringify(PRODUTOS)); populateSelect('produto', PRODUTOS); } else { EMBALAGENS.push(v); localStorage.setItem('embalagens_list', JSON.stringify(EMBALAGENS)); populateSelect('embalagem', EMBALAGENS); } document.getElementById('new-manage-item-input').value = ''; renderManageList(); showToast('Item adicionado!'); }
     function removeManageItem(i) { if (manageTab === 'produtos') { PRODUTOS.splice(i, 1); localStorage.setItem('produtos_list', JSON.stringify(PRODUTOS)); populateSelect('produto', PRODUTOS); } else { EMBALAGENS.splice(i, 1); localStorage.setItem('embalagens_list', JSON.stringify(EMBALAGENS)); populateSelect('embalagem', EMBALAGENS); } renderManageList(); }
-    function openDashboard() { document.getElementById('modal-dashboard').classList.remove('hidden'); applyFilters(); }
+
+    async function openDashboard() { document.getElementById('modal-dashboard').classList.remove('hidden'); await loadAllRecords(); applyFilters(); }
     function closeDashboard() { document.getElementById('modal-dashboard').classList.add('hidden'); }
-    function applyFilters() { const df = document.getElementById('filter-date').value, lf = document.getElementById('filter-linha').value; let f = [...records]; if (df) f = f.filter(r => r.data === df); if (lf) f = f.filter(r => r.linha === lf); filteredRecords = f; document.getElementById('dashboard-stats-text').innerHTML = `<strong>${f.length}</strong> registro(s)`; const tbody = document.getElementById('dashboard-tbody'), thead = document.getElementById('dashboard-thead'), empty = document.getElementById('dashboard-empty'); if (!f.length) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; } empty.classList.add('hidden'); const keys = new Set(); f.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['data','seuNome','turno','linha','produto','embalagem','funcao']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','timestamp'].includes(k))]; thead.innerHTML = '<tr>' + ok.map(k => `<th>${k}</th>`).join('') + '</tr>'; tbody.innerHTML = f.slice(0, 200).map(r => '<tr>' + ok.map(k => `<td>${r[k] || ''}</td>`).join('') + '</tr>').join(''); }
+    function applyFilters() {
+      const df = document.getElementById('filter-date').value, lf = document.getElementById('filter-linha').value;
+      filteredRecords = allRecords.filter(r => {
+        if (df && r.dados !== df) return false;
+        if (lf && r.linha !== lf) return false;
+        return true;
+      });
+      document.getElementById('dashboard-stats-text').innerHTML = `<strong>${filteredRecords.length}</strong> registro(s)`;
+      const tbody = document.getElementById('dashboard-tbody'), thead = document.getElementById('dashboard-thead'), empty = document.getElementById('dashboard-empty');
+      if (!filteredRecords.length) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k)));
+      const pk = ['dados','seuNome','turno','linha','produto','embalagem','máquina'];
+      const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))];
+      thead.innerHTML = '<tr>' + ok.map(k => `<th>${k}</th>`).join('') + '</tr>';
+      tbody.innerHTML = filteredRecords.map(r => '<tr>' + ok.map(k => `<td>${r[k] || ''}</td>`).join('') + '</tr>').join('');
+    }
     function clearFilters() { document.getElementById('filter-date').value = ''; document.getElementById('filter-linha').value = ''; buildCustomSelects(); applyFilters(); }
-    function closePasswordModal() { document.getElementById('modal-password').classList.add('hidden'); }
-    function confirmPassword() { showToast(document.getElementById('modal-password-input').value === 'admin123' ? 'Acesso liberado!' : 'Senha incorreta!'); closePasswordModal(); }
-    function toggleMyRecords() { const d = document.getElementById('my-records'); d.classList.toggle('hidden'); if (!d.classList.contains('hidden')) document.getElementById('records-list').innerHTML = records.slice(0, 20).map(r => `<div class="record-item"><strong>${r.data}</strong> — ${r.seuNome} — ${r.linha} — ${r.funcao} — ${r.produto}</div>`).join(''); }
-    function exportToExcel() { if (!filteredRecords.length) { showToast('Nenhum registro para exportar.'); return; } const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['data','seuNome','turno','linha','produto','embalagem','funcao']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','timestamp'].includes(k))]; let csv = ok.join(';') + '\n'; filteredRecords.forEach(r => { csv += ok.map(k => (r[k] !== undefined ? r[k] : '')).join(';') + '\n'; }); const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'corte_producao.csv'; a.click(); URL.revokeObjectURL(url); showToast('Exportado com sucesso!'); }
+    function toggleMyRecords() { const d = document.getElementById('my-records'); d.classList.toggle('hidden'); if (!d.classList.contains('hidden')) document.getElementById('records-list').innerHTML = allRecords.slice(0, 20).map(r => `<div class="record-item"><strong>${r.dados}</strong> — ${r.seuNome} — ${r.linha} — ${r["máquina"]} — ${r.produto}</div>`).join(''); }
+    function exportToExcel() {
+      if (!filteredRecords.length) { showToast('Nenhum registro para exportar.'); return; }
+      const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k)));
+      const pk = ['dados','seuNome','turno','linha','produto','embalagem','máquina'];
+      const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))];
+      let csv = ok.join(';') + '\n';
+      filteredRecords.forEach(r => { csv += ok.map(k => (r[k] !== undefined ? r[k] : '')).join(';') + '\n'; });
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'corte_producao.csv'; a.click(); URL.revokeObjectURL(url);
+      showToast('Exportado com sucesso!');
+    }
   </script>
 </body>
 </html>
