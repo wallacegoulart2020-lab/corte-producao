@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Corte de Produção</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #06080d;
+      --glass: rgba(18, 23, 31, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-hover: rgba(18, 23, 31, 0.8);
+      --primary: #5c9eff;
+      --primary-dark: #3e7fd9;
+      --danger: #ff506e;
+      --success: #00e6a0;
+      --warning: #ffb347;
+      --text: #e8ecf2;
+      --text-secondary: #94a3b8;
+      --border: rgba(255, 255, 255, 0.06);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.5;
+      min-height: 100dvh; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(0,200,150,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(92,158,255,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 50% 50%, rgba(147,51,234,0.04) 0%, transparent 60%);
+      animation: bgPulse 10s ease-in-out infinite; pointer-events: none;
+    }
+    @keyframes bgPulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
+    .hidden { display: none !important; }
+
+    /* LOADING */
+    .loading-screen { position: fixed; inset: 0; background: #06090f; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+    .loading-logo { text-align: center; }
+    .loading-icon { font-size: 48px; margin-bottom: 12px; animation: pulse 1.8s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(92,158,255,0.6)); }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    .loading-logo h2 { font-size: 20px; color: var(--text); margin-bottom: 16px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; }
+    .loading-bar { width: 200px; height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; margin: 0 auto; }
+    .loading-fill { width: 60%; height: 100%; background: linear-gradient(90deg, #5c9eff, #00e6a0); border-radius: 2px; animation: loading-slide 1.2s ease-in-out infinite; }
+    @keyframes loading-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+
+    .app { max-width: 640px; margin: 0 auto; padding: 16px; padding-bottom: 40px; position: relative; z-index: 1; }
+
+    /* HEADER */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      padding: 14px 20px; border-radius: var(--radius);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
+      margin-bottom: 16px; position: sticky; top: 8px; z-index: 100;
+      border: 1px solid var(--glass-border);
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-icon { font-size: 30px; filter: drop-shadow(0 0 8px #5c9eff); }
+    .header-title { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; cursor: pointer; user-select: none; }
+    .header-subtitle { font-size: 11px; color: var(--text-secondary); }
+    .btn-dados {
+      background: rgba(92,158,255,0.12); color: var(--primary);
+      border: 1px solid rgba(92,158,255,0.3); padding: 8px 18px; border-radius: 20px;
+      font-weight: 600; font-size: 13px; cursor: pointer; transition: var(--transition);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    }
+    .btn-dados:hover { background: rgba(92,158,255,0.25); box-shadow: 0 0 20px rgba(92,158,255,0.3); transform: translateY(-1px); }
+
+    /* ALERT */
+    .alert-banner {
+      display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+      border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 13px;
+      background: rgba(255,179,71,0.12); color: #ffb347; border: 1px solid rgba(255,179,71,0.3);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    }
+    .alert-close { margin-left: auto; background: none; border: none; cursor: pointer; font-size: 16px; color: inherit; }
+
+    /* FORM SECTIONS */
+    .form-section {
+      background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 18px; margin-bottom: 12px; border: 1px solid var(--glass-border);
+      animation: fadeSlideUp 0.4s ease-out;
+    }
+    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .section-icon { font-size: 20px; }
+    .section-title { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: 0.3px; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    .form-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.2px; }
+    .form-label.required::after { content: ' *'; color: var(--danger); }
+    .form-input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
+      background: rgba(255,255,255,0.03); color: var(--text);
+      transition: all var(--transition);
+    }
+    .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(92,158,255,0.15); }
+    .form-input::placeholder { color: #4a5568; }
+
+    /* NATIVE SELECT HIDDEN */
+    select.form-select { position: absolute; opacity: 0; pointer-events: none; height: 0; width: 0; }
+
+    /* CUSTOM SELECT BUTTON */
+    .custom-select-btn {
+      width: 100%; padding: 10px 30px 10px 12px; border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
+      background: rgba(255,255,255,0.03); color: var(--text);
+      transition: all var(--transition); cursor: pointer; text-align: left;
+      position: relative; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    }
+    .custom-select-btn:hover { border-color: rgba(92,158,255,0.4); background: rgba(255,255,255,0.05); }
+    .custom-select-btn:active { transform: scale(0.98); }
+    .custom-select-btn::after {
+      content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--text-secondary); font-size: 12px; transition: transform 0.3s;
+    }
+    .custom-select-btn.open::after { transform: translateY(-50%) rotate(180deg); }
+    .custom-select-btn.placeholder { color: #4a5568; }
+
+    .select-add-wrapper { display: flex; gap: 6px; }
+    .select-add-wrapper .custom-select-btn { flex: 1; }
+    .btn-add-item {
+      width: 34px; height: 38px; background: rgba(92,158,255,0.08); color: var(--primary);
+      border: 1px solid rgba(92,158,255,0.25); border-radius: var(--radius-sm); cursor: pointer;
+      font-size: 18px; display: flex; align-items: center; justify-content: center;
+      transition: var(--transition);
+    }
+    .btn-add-item:hover { background: rgba(92,158,255,0.2); box-shadow: 0 0 12px rgba(92,158,255,0.3); }
+
+    /* DATE */
+    .date-input-wrapper { position: relative; display: flex; }
+    .date-input-wrapper .form-input { padding-right: 38px; }
+    .date-toggle-btn {
+      position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; font-size: 16px; cursor: pointer; padding: 4px 8px; opacity: 0.7;
+    }
+    .date-toggle-btn:hover { opacity: 1; }
+    .calendar-popup {
+      position: absolute; top: calc(100% + 4px); left: 0; z-index: 400;
+      background: var(--glass-hover); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border); border-radius: var(--radius-sm);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5); padding: 12px; min-width: 240px;
+      animation: fadeSlideUp 0.2s ease-out;
+    }
+    .calendar-popup .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: var(--text); font-weight: 600; font-size: 13px; }
+    .calendar-popup .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 12px; color: var(--text-secondary); }
+    .calendar-popup .cal-day { padding: 6px; cursor: pointer; border-radius: 50%; color: var(--text); transition: var(--transition); }
+    .calendar-popup .cal-day:hover { background: rgba(92,158,255,0.15); }
+    .calendar-popup .cal-day.today { border: 1px solid var(--primary); color: var(--primary); font-weight: 600; }
+
+    /* SUBMIT */
+    .form-submit-area { margin-top: 20px; display: flex; justify-content: center; }
+    .btn-submit {
+      display: flex; align-items: center; gap: 8px; padding: 14px 36px;
+      background: rgba(0,230,160,0.08); color: var(--success);
+      border: 2px solid rgba(0,230,160,0.5); border-radius: 30px;
+      font-size: 15px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; box-shadow: 0 0 20px rgba(0,230,160,0.15);
+      transition: all 0.35s ease; position: relative; overflow: hidden;
+    }
+    .btn-submit::after {
+      content: ''; position: absolute; top: 50%; left: 50%; width: 300%; height: 300%;
+      background: radial-gradient(circle, rgba(0,230,160,0.3) 0%, transparent 60%);
+      transform: translate(-50%, -50%) scale(0); transition: transform 0.5s;
+    }
+    .btn-submit:hover::after { transform: translate(-50%, -50%) scale(1); }
+    .btn-submit:hover { background: var(--success); color: #06080d; box-shadow: 0 0 40px rgba(0,230,160,0.5); transform: translateY(-2px); }
+    .btn-submit-icon { font-size: 18px; position: relative; z-index: 1; }
+    .btn-submit span { position: relative; z-index: 1; }
+
+    /* RECORDS */
+    .my-records { background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-top: 16px; border: 1px solid var(--glass-border); }
+    .btn-close-records { background: none; border: none; cursor: pointer; font-size: 18px; margin-left: auto; color: var(--text-secondary); }
+    .records-list { max-height: 400px; overflow-y: auto; margin-top: 12px; }
+    .record-item { padding: 12px; border: 1px solid var(--glass-border); border-radius: var(--radius-sm); margin-bottom: 8px; cursor: pointer; transition: var(--transition); font-size: 13px; background: rgba(255,255,255,0.02); }
+    .record-item:hover { border-color: var(--primary-dark); background: rgba(92,158,255,0.05); }
+
+    /* MODALS */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      animation: fadeIn 0.25s ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.92) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal {
+      background: var(--glass-hover); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+      border-radius: var(--radius); padding: 24px; width: 100%; max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border); animation: modalIn 0.3s ease-out;
+    }
+    .modal-wide { max-width: 600px; max-height: 80vh; overflow-y: auto; }
+    .modal-full { max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .modal-header h3 { font-size: 17px; font-weight: 600; color: var(--text); }
+    .modal-icon { font-size: 22px; }
+    .modal-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+    .modal-close-btn { margin-left: auto; background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-secondary); transition: var(--transition); }
+    .modal-close-btn:hover { color: var(--text); }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+    .btn-primary, .btn-secondary, .btn-danger {
+      padding: 10px 20px; border-radius: 20px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--transition);
+    }
+    .btn-primary { background: rgba(92,158,255,0.2); color: var(--primary); border: 1px solid rgba(92,158,255,0.4); }
+    .btn-primary:hover { background: rgba(92,158,255,0.35); box-shadow: 0 0 16px rgba(92,158,255,0.3); }
+    .btn-secondary { background: rgba(255,255,255,0.04); color: var(--text); border: 1px solid var(--glass-border); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.08); }
+    .btn-danger { background: rgba(255,80,110,0.15); color: var(--danger); border: 1px solid rgba(255,80,110,0.4); }
+    .btn-danger:hover { background: rgba(255,80,110,0.3); box-shadow: 0 0 16px rgba(255,80,110,0.3); }
+
+    /* SELECT MODAL (custom) */
+    .select-modal-content {
+      max-height: 60vh; overflow-y: auto; margin: 8px 0;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .select-option {
+      padding: 12px 16px; border-radius: var(--radius-sm); cursor: pointer;
+      transition: var(--transition); color: var(--text); font-size: 14px;
+      border: 1px solid transparent;
+    }
+    .select-option:hover, .select-option.active { background: rgba(92,158,255,0.12); border-color: rgba(92,158,255,0.2); }
+    .select-option.selected { background: rgba(0,230,160,0.12); border-color: rgba(0,230,160,0.3); color: var(--success); }
+
+    .item-list { max-height: 200px; overflow-y: auto; margin: 12px 0; border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 8px; background: rgba(255,255,255,0.02); }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; font-size: 13px; border-bottom: 1px solid var(--glass-border); }
+    .item-row:last-child { border-bottom: none; }
+    .item-remove { color: var(--danger); cursor: pointer; background: none; border: none; font-size: 14px; }
+
+    /* DASHBOARD */
+    .dashboard-filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
+    .filter-group { display: flex; flex-direction: column; gap: 4px; }
+    .dashboard-stats { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; font-size: 13px; color: var(--text-secondary); flex-wrap: wrap; }
+    .dashboard-table-wrapper { overflow-x: auto; }
+    .dashboard-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .dashboard-table th, .dashboard-table td { padding: 6px 8px; border: 1px solid var(--glass-border); text-align: left; white-space: nowrap; }
+    .dashboard-table th { background: rgba(92,158,255,0.08); color: var(--primary); font-weight: 600; }
+    .dashboard-table td { background: rgba(255,255,255,0.01); }
+    .dashboard-empty { text-align: center; padding: 40px; color: var(--text-secondary); }
+
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--glass-hover); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      color: #fff; padding: 12px 28px; border-radius: 24px; font-size: 13px; z-index: 2000;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
+      animation: fadeSlideUp 0.3s ease-out;
+    }
+    .info-text { text-align: center; color: var(--text-secondary); padding: 20px; font-size: 13px; }
+
+    @media (max-width: 480px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid.cols-3 { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .form-grid.cols-3 .form-input, .form-grid.cols-3 .custom-select-btn { font-size: 11px; padding: 8px 4px; }
+      .form-grid.cols-3 .form-label { font-size: 10px; }
+      .header { flex-wrap: wrap; gap: 8px; }
+      .btn-dados { margin-left: auto; }
+      .modal { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-logo">
+      <div class="loading-icon">⚙️</div>
+      <h2>Corte de Produção</h2>
+      <div class="loading-bar"><div class="loading-fill"></div></div>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <header class="header">
+      <div class="header-left">
+        <div class="header-icon">🏭</div>
+        <div>
+          <h1 class="header-title" id="header-title">Corte de Produção</h1>
+          <p class="header-subtitle" id="header-date"></p>
+        </div>
+      </div>
+      <button id="btn-dados" class="btn-dados">Dados</button>
+    </header>
+
+    <div id="alert-banner" class="alert-banner hidden">
+      <span class="alert-icon">⚠️</span> <span id="alert-text"></span>
+      <button class="alert-close" onclick="closeAlert()">✕</button>
+    </div>
+
+    <main class="main-content">
+      <form id="production-form" novalidate>
+        <div class="form-section">
+          <div class="section-header"><span class="section-icon">📋</span><h2 class="section-title">Informações Básicas</h2></div>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label class="form-label required" for="data">Data</label>
+              <div class="date-input-wrapper">
+                <input type="text" id="data" name="data" class="form-input" placeholder="DD/MM/AAAA" readonly>
+                <button type="button" class="date-toggle-btn" id="date-toggle-btn">📅</button>
+                <div id="calendar-popup" class="calendar-popup hidden"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label required" for="seu-nome">Seu Nome</label>
+              <input type="text" id="seu-nome" name="seu-nome" class="form-input" placeholder="Nome completo">
+            </div>
+            <div class="form-group">
+              <label class="form-label required" for="turno">Turno</label>
+              <div id="wrapper-turno" class="custom-select-wrapper">
+                <select id="turno" name="turno" class="form-select" data-placeholder="Selecione o turno">
+                  <option value="">Selecione o turno</option>
+                  <option value="Turno 1">Turno 1</option>
+                  <option value="Turno 2">Turno 2</option>
+                  <option value="Turno 3">Turno 3</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label required" for="linha">Qual Linha?</label>
+              <div id="wrapper-linha" class="custom-select-wrapper">
+                <select id="linha" name="linha" class="form-select" data-placeholder="Selecione a linha">
+                  <option value="">Selecione a linha</option>
+                  <option value="L512">L512</option>
+                  <option value="L513">L513</option>
+                  <option value="L514">L514</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label required" for="produto">Produto</label>
+              <div class="select-add-wrapper">
+                <div id="wrapper-produto" class="custom-select-wrapper" style="flex:1">
+                  <select id="produto" name="produto" class="form-select" data-placeholder="Selecione o produto"></select>
+                </div>
+                <button type="button" class="btn-add-item" id="btn-add-produto">＋</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label required" for="embalagem">Embalagem</label>
+              <div class="select-add-wrapper">
+                <div id="wrapper-embalagem" class="custom-select-wrapper" style="flex:1">
+                  <select id="embalagem" name="embalagem" class="form-select" data-placeholder="Selecione a embalagem"></select>
+                </div>
+                <button type="button" class="btn-add-item" id="btn-add-embalagem">＋</button>
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label required" for="funcao">Qual sua Máquina?</label>
+              <div id="wrapper-funcao" class="custom-select-wrapper">
+                <select id="funcao" name="funcao" class="form-select" data-placeholder="Selecione a função">
+                  <option value="">Selecione a função</option>
+                  <option value="Enchedora">Enchedora</option>
+                  <option value="Inspetores">Inspetores</option>
+                  <option value="Empacotadora">Empacotadora</option>
+                  <option value="Paletizadora">Paletizadora</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dynamic-sections"></div>
+
+        <div class="form-submit-area">
+          <button type="submit" class="btn-submit" id="btn-submit">
+            <span class="btn-submit-icon">💾</span> <span>Salvar Registro</span>
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <div id="my-records" class="my-records hidden">
+      <div class="section-header"><span class="section-icon">📝</span><h2 class="section-title">Registros Recentes</h2><button class="btn-close-records" onclick="toggleMyRecords()">✕</button></div>
+      <div id="records-list" class="records-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal de seleção customizado -->
+  <div id="modal-select" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-icon" id="modal-select-icon">📋</span>
+        <h3 id="modal-select-title">Selecionar</h3>
+        <button class="modal-close-btn" onclick="closeSelectModal()">✕</button>
+      </div>
+      <div id="modal-select-content" class="select-modal-content"></div>
+    </div>
+  </div>
+
+  <div id="modal-manage-items" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header"><span class="modal-icon">⚙️</span><h3>Gerenciar Listas</h3><button class="modal-close-btn" onclick="closeManageItemsModal()">✕</button></div>
+      <div style="display:flex;gap:12px;margin-bottom:12px;">
+        <button class="btn-primary" id="tab-produtos-btn" onclick="switchManageTab('produtos')">Produtos</button>
+        <button class="btn-secondary" id="tab-embalagens-btn" onclick="switchManageTab('embalagens')">Embalagens</button>
+      </div>
+      <div class="form-grid" style="margin-bottom:12px;"><div class="form-group full-width"><input type="text" id="new-manage-item-input" class="form-input" placeholder="Novo item..."></div></div>
+      <button class="btn-primary" style="width:100%;margin-bottom:12px;" onclick="addManageItem()">➕ Adicionar</button>
+      <div id="manage-item-list" class="item-list"></div>
+      <div class="modal-actions"><button class="btn-secondary" onclick="closeManageItemsModal()">Fechar</button></div>
+    </div>
+  </div>
+
+  <div id="modal-password" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header"><span class="modal-icon">🔒</span><h3>Acesso Restrito</h3></div>
+      <p class="modal-desc">Digite a senha para continuar.</p>
+      <input type="password" id="modal-password-input" class="form-input" placeholder="••••••">
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closePasswordModal()">Cancelar</button>
+        <button class="btn-primary" onclick="confirmPassword()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-dashboard" class="modal-overlay hidden">
+    <div class="modal modal-full">
+      <div class="modal-header"><span class="modal-icon">📈</span><h3>Dados Registrados</h3><button class="modal-close-btn" onclick="closeDashboard()">✕</button></div>
+      <div class="dashboard-filters">
+        <div class="filter-group">
+          <label class="form-label">Data</label>
+          <div class="date-input-wrapper">
+            <input type="text" id="filter-date" class="form-input" placeholder="DD/MM/AAAA" readonly>
+            <button type="button" class="date-toggle-btn" id="filter-date-toggle">📅</button>
+            <div id="filter-calendar-popup" class="calendar-popup hidden"></div>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="form-label">Linha</label>
+          <div id="wrapper-filter-linha" class="custom-select-wrapper">
+            <select id="filter-linha" class="form-select" data-placeholder="Todas as linhas">
+              <option value="">Todas as linhas</option>
+              <option value="L512">L512</option>
+              <option value="L513">L513</option>
+              <option value="L514">L514</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="applyFilters()">🔍 Filtrar</button>
+        <button class="btn-secondary" onclick="clearFilters()">↺ Limpar</button>
+      </div>
+      <div class="dashboard-stats">
+        <span id="dashboard-stats-text"></span>
+        <button class="btn-primary" onclick="exportToExcel()">📥 Exportar Excel</button>
+      </div>
+      <div class="dashboard-table-wrapper">
+        <table class="dashboard-table"><thead id="dashboard-thead"></thead><tbody id="dashboard-tbody"></tbody></table>
+        <div id="dashboard-empty" class="dashboard-empty hidden"><span>📭</span><p>Nenhum registro encontrado.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script>
+    // ========== CONFIGURAÇÃO (mantida igual) ==========
+    const LINHA_CONFIG = {
+      L512: {
+        label: 'L512',
+        secoes: {
+          Enchedora: { titulo: 'Enchedora e Medidores', icon: '🔧', campos: [{ id: 'enchedora', label: 'Enchedora', tipo: 'number' }, { id: 'medidor-vazao', label: 'Medidor de Vazão', tipo: 'number' }], subsecoes: [] },
+          Inspetores: { titulo: 'Inspetores', icon: '🔍', campos: [], subsecoes: [
+            { titulo: 'CHK 1', icon: '🔎', campos: [{ id: 'chk1-t', label: 'Total', tipo: 'number' }, { id: 'chk1-b', label: 'Boas', tipo: 'number' }, { id: 'chk1-m', label: 'Mal Cheias', tipo: 'number' }] },
+            { titulo: 'Bbull 1', icon: '🔎', campos: [{ id: 'bb1-tl1', label: 'Total', tipo: 'number' }, { id: 'bb1-bl1', label: 'Boas', tipo: 'number' }, { id: 'bb1-ml1', label: 'Mal Cheias', tipo: 'number' }] },
+            { titulo: 'CHK 2', icon: '🔎', campos: [{ id: 'chk2-t', label: 'Total', tipo: 'number' }, { id: 'chk2-b', label: 'Boas', tipo: 'number' }, { id: 'chk2-m', label: 'Mal Cheias', tipo: 'number' }] },
+            { titulo: 'Bbull 2', icon: '🔎', campos: [{ id: 'bb1-tl2', label: 'Total', tipo: 'number' }, { id: 'bb1-bl2', label: 'Boas', tipo: 'number' }, { id: 'bb1-ml2', label: 'Mal Cheias', tipo: 'number' }] }
+          ]},
+          Empacotadora: { titulo: 'Empacotadora', icon: '📦', campos: [{ id: 'khs-p', label: 'KHS (Pacotes)', tipo: 'number' }], subsecoes: [] },
+          Paletizadora: { titulo: 'Paletizadora', icon: '📦', campos: [{ id: 'pl05', label: 'PL 05', tipo: 'number' }, { id: 'pl06', label: 'PL 06', tipo: 'number' }, { id: 'fracao512', label: 'Fração', tipo: 'number', step: '0.01' }], subsecoes: [] }
+        }
+      },
+      L513: {
+        label: 'L513',
+        secoes: {
+          Enchedora: { titulo: 'Enchedora e Medidores', icon: '🔧', campos: [{ id: 'enchedora', label: 'Enchedora', tipo: 'number' }, { id: 'medidor-vazao', label: 'Medidor de Vazão', tipo: 'number' }], subsecoes: [] },
+          Inspetores: { titulo: 'Inspetores', icon: '🔍', campos: [], subsecoes: [
+            { titulo: 'CHK 1', icon: '🔎', campos: [{ id: 'ic1-t', label: 'Total', tipo: 'number' }, { id: 'ic1-b', label: 'Boas', tipo: 'number' }, { id: 'ic1-m', label: 'Mal Cheias', tipo: 'number' }] },
+            { titulo: 'Stratec 1', icon: '🔎', campos: [{ id: 'is1-t', label: 'Total', tipo: 'number' }, { id: 'is1-b', label: 'Boas', tipo: 'number' }, { id: 'is1-m', label: 'Mal Cheias', tipo: 'number' }] },
+            { titulo: 'CHK 2', icon: '🔎', campos: [{ id: 'ic2-t', label: 'Total', tipo: 'number' }, { id: 'ic2-b', label: 'Boas', tipo: 'number' }, { id: 'ic2-m', label: 'Mal Cheias', tipo: 'number' }] },
+            { titulo: 'Stratec 2', icon: '🔎', campos: [{ id: 'is2-t', label: 'Total', tipo: 'number' }, { id: 'is2-b', label: 'Boas', tipo: 'number' }, { id: 'is2-m', label: 'Mal Cheias', tipo: 'number' }] }
+          ]},
+          Empacotadora: { titulo: 'Empacotadora', icon: '📦', campos: [{ id: 'khs-p2', label: 'KHS (Pacotes)', tipo: 'number' }, { id: 'em3', label: 'EPC Mead 3', tipo: 'number' }, { id: 'em4', label: 'EPC Mead 4', tipo: 'number' }], subsecoes: [] },
+          Paletizadora: { titulo: 'Paletizadora', icon: '📦', campos: [{ id: 'pl09', label: 'PL 09', tipo: 'number' }, { id: 'pl10', label: 'PL 10', tipo: 'number' }, { id: 'fracao513', label: 'Fração', tipo: 'number', step: '0.01' }], subsecoes: [] }
+        }
+      },
+      L514: {
+        label: 'L514',
+        secoes: {
+          Enchedora: { titulo: 'Enchedora e Medidores', icon: '🔧', campos: [{ id: 'enchedora', label: 'Enchedora', tipo: 'number' }, { id: 'medidor-vazao', label: 'Medidor de Vazão', tipo: 'number' }], subsecoes: [] },
+          Inspetores: { titulo: 'Inspetores', icon: '🔍', campos: [], subsecoes: [
+            { titulo: 'Helf', icon: '🔎', campos: [{ id: 'ih-t', label: 'Total', tipo: 'number' }, { id: 'ih-b', label: 'Boas', tipo: 'number' }, { id: 'ih-m', label: 'Mal Cheias', tipo: 'number' }] },
+            { titulo: 'Bbull', icon: '🔎', campos: [{ id: 'ib-t', label: 'Total', tipo: 'number' }, { id: 'ib-b', label: 'Boas', tipo: 'number' }, { id: 'ib-m', label: 'Mal Cheias', tipo: 'number' }] }
+          ]},
+          Empacotadora: { titulo: 'Empacotadora', icon: '📦', campos: [{ id: 'epc-m', label: 'EPC Mead', tipo: 'number' }, { id: 'epc-p', label: 'EPC Packmatic', tipo: 'number' }], subsecoes: [] },
+          Paletizadora: { titulo: 'Paletizadora', icon: '📦', campos: [{ id: 'pl3', label: 'PL 3', tipo: 'number' }, { id: 'pl4', label: 'PL 4', tipo: 'number' }, { id: 'fracao-pl', label: 'Fração PL', tipo: 'number', step: '0.01' }], subsecoes: [] }
+        }
+      }
+    };
+    let PRODUTOS = JSON.parse(localStorage.getItem('produtos_list') || 'null') || ['1 - Antarctica 350ml','2 - Antarctica 269ml','3 - Skol 350ml','4 - Skol 269ml','5 - Brahma 350ml','6 - Brahma 269ml','7 - Brahma Duplo Malte 350ml','9 - Budweiser 350ml','10 - Budweiser 269ml','11 - Spaten 350ml','12 - Spaten 269ml','13 - Original 350ml','14 - Original 269ml','15 - Bohemia 350ml','16 - Bohemia 269ml','19 - Caracu 350ml','20 - Subzero 350ml','22 - Beats Senses 269ml','23 - Beats GT 269ml','24 - Beats Tropical 269ml','25 - Beats Caipirinha 350ml','27 - Red Mix 269ml','33 - Brutal Long Neck'];
+    let EMBALAGENS = JSON.parse(localStorage.getItem('embalagens_list') || 'null') || ['Pack 8 Latas','Pack 12 Latas','Pack 12 Latas (Box/Papelão)','Pack 15 Latas','Pack 18 Latas'];
+    let currentLinha = null, currentFuncao = null;
+    let records = JSON.parse(localStorage.getItem('corte_producao') || '[]');
+    let manageTab = 'produtos';
+    let filteredRecords = [];
+    let activeSelectEl = null; // select sendo editado no modal
+
+    // ========== CUSTOM SELECT SYSTEM ==========
+    function buildCustomSelects() {
+      document.querySelectorAll('select.form-select').forEach(select => {
+        // Verifica se já tem botão customizado
+        const wrapper = select.closest('.custom-select-wrapper');
+        if (!wrapper) return;
+        // Remove botão antigo se existir
+        const oldBtn = wrapper.querySelector('.custom-select-btn');
+        if (oldBtn) oldBtn.remove();
+        // Cria botão
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'custom-select-btn';
+        const selectedOption = select.options[select.selectedIndex];
+        btn.textContent = selectedOption && selectedOption.value ? selectedOption.textContent : (select.dataset.placeholder || 'Selecione...');
+        if (!selectedOption || !selectedOption.value) btn.classList.add('placeholder');
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openSelectModal(select);
+        });
+        wrapper.appendChild(btn);
+      });
+    }
+
+    function openSelectModal(selectEl) {
+      activeSelectEl = selectEl;
+      const options = Array.from(selectEl.options);
+      const title = selectEl.dataset.placeholder || selectEl.closest('.form-group')?.querySelector('.form-label')?.textContent || 'Selecionar';
+      document.getElementById('modal-select-title').textContent = title;
+      document.getElementById('modal-select-icon').textContent = '📋';
+      const content = document.getElementById('modal-select-content');
+      const currentValue = selectEl.value;
+      content.innerHTML = options.map(opt => {
+        const isSelected = opt.value === currentValue;
+        const isEmpty = opt.value === '';
+        return `<div class="select-option${isSelected ? ' selected' : ''}" data-value="${opt.value}" data-text="${opt.textContent}">
+          ${isEmpty ? '〈nenhum〉' : opt.textContent}
+        </div>`;
+      }).join('');
+      // Event listeners
+      content.querySelectorAll('.select-option').forEach(div => {
+        div.addEventListener('click', () => {
+          const val = div.dataset.value;
+          const txt = div.dataset.text;
+          // Atualiza select nativo
+          selectEl.value = val;
+          // Atualiza botão customizado
+          const wrapper = selectEl.closest('.custom-select-wrapper');
+          if (wrapper) {
+            const btn = wrapper.querySelector('.custom-select-btn');
+            if (btn) {
+              btn.textContent = val ? txt : (selectEl.dataset.placeholder || 'Selecione...');
+              if (!val) btn.classList.add('placeholder'); else btn.classList.remove('placeholder');
+            }
+          }
+          // Dispara evento change
+          selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+          closeSelectModal();
+        });
+      });
+      document.getElementById('modal-select').classList.remove('hidden');
+    }
+
+    function closeSelectModal() {
+      document.getElementById('modal-select').classList.add('hidden');
+      activeSelectEl = null;
+    }
+
+    // Fechar modal de seleção ao clicar fora
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('modal-select');
+      if (!modal.classList.contains('hidden') && e.target === modal) {
+        closeSelectModal();
+      }
+    });
+
+    // ========== INICIALIZAÇÃO ==========
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => { document.getElementById('loading-screen').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); }, 700);
+      const hoje = new Date();
+      document.getElementById('data').value = hoje.toLocaleDateString('pt-BR');
+      document.getElementById('header-date').textContent = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      populateSelect('produto', PRODUTOS);
+      populateSelect('embalagem', EMBALAGENS);
+
+      // Constrói custom selects iniciais
+      buildCustomSelects();
+
+      document.getElementById('linha').addEventListener('change', onLinhaChange);
+      document.getElementById('funcao').addEventListener('change', onFuncaoChange);
+      document.getElementById('production-form').addEventListener('submit', onSubmit);
+      document.getElementById('btn-dados').addEventListener('click', openDashboard);
+      document.getElementById('date-toggle-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleCalendar('data', 'calendar-popup'); });
+      document.getElementById('filter-date-toggle').addEventListener('click', (e) => { e.stopPropagation(); toggleCalendar('filter-date', 'filter-calendar-popup'); });
+      document.getElementById('btn-add-produto').addEventListener('click', () => { manageTab = 'produtos'; openManageItemsModal(); });
+      document.getElementById('btn-add-embalagem').addEventListener('click', () => { manageTab = 'embalagens'; openManageItemsModal(); });
+      document.getElementById('dynamic-sections').innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>';
+
+      let titleClicks = 0, titleTimer = null;
+      document.getElementById('header-title').addEventListener('click', () => {
+        titleClicks++;
+        if (titleClicks === 1) { titleTimer = setTimeout(() => { titleClicks = 0; }, 1500); }
+        else if (titleClicks === 3) { clearTimeout(titleTimer); titleClicks = 0; manageTab = 'produtos'; openManageItemsModal(); }
+      });
+
+      document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.add('hidden'); }));
+      document.addEventListener('click', (e) => { if (!e.target.closest('.date-input-wrapper')) document.querySelectorAll('.calendar-popup').forEach(c => c.classList.add('hidden')); });
+
+      // Reconstruir custom selects após popular
+      setTimeout(buildCustomSelects, 100);
+    });
+
+    function populateSelect(id, items) {
+      const s = document.getElementById(id);
+      const placeholder = id === 'produto' ? 'Selecione o produto' : 'Selecione a embalagem';
+      s.innerHTML = `<option value="">${placeholder}</option>`;
+      items.forEach(i => { const o = document.createElement('option'); o.value = i; o.textContent = i; s.appendChild(o); });
+      // Reconstruir botão customizado
+      setTimeout(() => {
+        const wrapper = s.closest('.custom-select-wrapper');
+        if (wrapper) {
+          const btn = wrapper.querySelector('.custom-select-btn');
+          if (btn) btn.remove();
+          buildCustomSelects();
+        }
+      }, 50);
+    }
+
+    function onLinhaChange(e) { currentLinha = e.target.value; document.getElementById('funcao').value = ''; currentFuncao = null; buildCustomSelects(); document.getElementById('dynamic-sections').innerHTML = currentLinha ? '<p class="info-text">Agora selecione <strong>Qual sua Máquina?</strong></p>' : '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>'; }
+    function onFuncaoChange(e) { currentFuncao = e.target.value; renderDynamicSections(); }
+
+    function renderDynamicSections() {
+      const container = document.getElementById('dynamic-sections');
+      if (!currentLinha || !currentFuncao) { container.innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>'; return; }
+      const cfg = LINHA_CONFIG[currentLinha];
+      if (!cfg?.secoes[currentFuncao]) { container.innerHTML = '<p style="text-align:center;color:#ff506e;padding:20px;">Configuração não encontrada.</p>'; return; }
+      const sec = cfg.secoes[currentFuncao];
+      let html = `<div class="form-section"><div class="section-header"><span class="section-icon">${sec.icon}</span><h2 class="section-title">${sec.titulo} — ${cfg.label}</h2></div>`;
+      if (sec.campos?.length) { html += '<div class="form-grid">'; sec.campos.forEach(c => html += `<div class="form-group"><label class="form-label" for="${c.id}">${c.label}</label><input type="${c.tipo}" id="${c.id}" name="${c.id}" class="form-input" placeholder="0"${c.step ? ` step="${c.step}"` : ''}></div>`); html += '</div>'; }
+      html += '</div>';
+      if (sec.subsecoes?.length) { sec.subsecoes.forEach(sub => { html += `<div class="form-section"><div class="section-header"><span class="section-icon">${sub.icon}</span><h2 class="section-title">${sub.titulo}</h2></div><div class="form-grid cols-3">`; sub.campos.forEach(c => html += `<div class="form-group"><label class="form-label" for="${c.id}">${c.label}</label><input type="${c.tipo}" id="${c.id}" name="${c.id}" class="form-input" placeholder="0"${c.step ? ` step="${c.step}"` : ''}></div>`); html += '</div></div>'; }); }
+      container.innerHTML = html;
+    }
+
+    function onSubmit(e) {
+      e.preventDefault();
+      const data = document.getElementById('data').value, seuNome = document.getElementById('seu-nome').value.trim(), turno = document.getElementById('turno').value, linha = document.getElementById('linha').value, produto = document.getElementById('produto').value, embalagem = document.getElementById('embalagem').value, funcao = document.getElementById('funcao').value;
+      if (!data || !seuNome || !turno || !linha || !produto || !embalagem || !funcao) { showAlert('Preencha todos os campos obrigatórios.'); return; }
+      const dyn = {}; document.querySelectorAll('#dynamic-sections input').forEach(i => { if (i.value) dyn[i.name || i.id] = i.value; });
+      records.unshift({ id: Date.now(), timestamp: new Date().toISOString(), data, seuNome, turno, linha, produto, embalagem, funcao, ...dyn });
+      localStorage.setItem('corte_producao', JSON.stringify(records));
+      showToast('Registro salvo! ✅');
+      document.getElementById('production-form').reset();
+      document.getElementById('data').value = new Date().toLocaleDateString('pt-BR');
+      document.getElementById('dynamic-sections').innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>';
+      currentLinha = null; currentFuncao = null;
+      buildCustomSelects();
+    }
+
+    function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 2500); }
+    function showAlert(m) { const b = document.getElementById('alert-banner'); document.getElementById('alert-text').textContent = m; b.classList.remove('hidden'); setTimeout(() => b.classList.add('hidden'), 4000); }
+    function closeAlert() { document.getElementById('alert-banner').classList.add('hidden'); }
+
+    function toggleCalendar(inpId, popId) {
+      const popup = document.getElementById(popId);
+      document.querySelectorAll('.calendar-popup').forEach(c => { if (c !== popup) c.classList.add('hidden'); });
+      if (popup.classList.contains('hidden')) { renderCalendar(inpId, popId); popup.classList.remove('hidden'); } else popup.classList.add('hidden');
+    }
+    function renderCalendar(inpId, popId) {
+      const h = new Date(), m = h.getMonth(), a = h.getFullYear(), dias = new Date(a, m + 1, 0).getDate(), pd = new Date(a, m, 1).getDay();
+      let html = `<div class="cal-header"><span>${h.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</span></div><div class="cal-grid">`;
+      ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(d => html += `<div style="font-weight:600;font-size:10px">${d}</div>`);
+      for (let i = 0; i < pd; i++) html += '<div></div>';
+      for (let d = 1; d <= dias; d++) html += `<div class="cal-day${d === h.getDate() ? ' today' : ''}" onclick="selectDate('${inpId}','${popId}',${d})">${d}</div>`;
+      html += '</div>'; document.getElementById(popId).innerHTML = html;
+    }
+    function selectDate(inpId, popId, dia) { const h = new Date(); document.getElementById(inpId).value = new Date(h.getFullYear(), h.getMonth(), dia).toLocaleDateString('pt-BR'); document.getElementById(popId).classList.add('hidden'); }
+
+    function openManageItemsModal() { document.getElementById('modal-manage-items').classList.remove('hidden'); switchManageTab(manageTab); }
+    function closeManageItemsModal() { document.getElementById('modal-manage-items').classList.add('hidden'); }
+    function switchManageTab(tab) { manageTab = tab; document.getElementById('tab-produtos-btn').className = tab === 'produtos' ? 'btn-primary' : 'btn-secondary'; document.getElementById('tab-embalagens-btn').className = tab === 'embalagens' ? 'btn-primary' : 'btn-secondary'; renderManageList(); }
+    function renderManageList() { const list = manageTab === 'produtos' ? PRODUTOS : EMBALAGENS; document.getElementById('manage-item-list').innerHTML = list.map((item, i) => `<div class="item-row"><span>${item}</span><button class="item-remove" onclick="removeManageItem(${i})">✕</button></div>`).join(''); }
+    function addManageItem() { const v = document.getElementById('new-manage-item-input').value.trim(); if (!v) return; if (manageTab === 'produtos') { PRODUTOS.push(v); localStorage.setItem('produtos_list', JSON.stringify(PRODUTOS)); populateSelect('produto', PRODUTOS); } else { EMBALAGENS.push(v); localStorage.setItem('embalagens_list', JSON.stringify(EMBALAGENS)); populateSelect('embalagem', EMBALAGENS); } document.getElementById('new-manage-item-input').value = ''; renderManageList(); showToast('Item adicionado!'); }
+    function removeManageItem(i) { if (manageTab === 'produtos') { PRODUTOS.splice(i, 1); localStorage.setItem('produtos_list', JSON.stringify(PRODUTOS)); populateSelect('produto', PRODUTOS); } else { EMBALAGENS.splice(i, 1); localStorage.setItem('embalagens_list', JSON.stringify(EMBALAGENS)); populateSelect('embalagem', EMBALAGENS); } renderManageList(); }
+    function openDashboard() { document.getElementById('modal-dashboard').classList.remove('hidden'); applyFilters(); }
+    function closeDashboard() { document.getElementById('modal-dashboard').classList.add('hidden'); }
+    function applyFilters() { const df = document.getElementById('filter-date').value, lf = document.getElementById('filter-linha').value; let f = [...records]; if (df) f = f.filter(r => r.data === df); if (lf) f = f.filter(r => r.linha === lf); filteredRecords = f; document.getElementById('dashboard-stats-text').innerHTML = `<strong>${f.length}</strong> registro(s)`; const tbody = document.getElementById('dashboard-tbody'), thead = document.getElementById('dashboard-thead'), empty = document.getElementById('dashboard-empty'); if (!f.length) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; } empty.classList.add('hidden'); const keys = new Set(); f.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['data','seuNome','turno','linha','produto','embalagem','funcao']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','timestamp'].includes(k))]; thead.innerHTML = '<tr>' + ok.map(k => `<th>${k}</th>`).join('') + '</tr>'; tbody.innerHTML = f.slice(0, 200).map(r => '<tr>' + ok.map(k => `<td>${r[k] || ''}</td>`).join('') + '</tr>').join(''); }
+    function clearFilters() { document.getElementById('filter-date').value = ''; document.getElementById('filter-linha').value = ''; buildCustomSelects(); applyFilters(); }
+    function closePasswordModal() { document.getElementById('modal-password').classList.add('hidden'); }
+    function confirmPassword() { showToast(document.getElementById('modal-password-input').value === 'admin123' ? 'Acesso liberado!' : 'Senha incorreta!'); closePasswordModal(); }
+    function toggleMyRecords() { const d = document.getElementById('my-records'); d.classList.toggle('hidden'); if (!d.classList.contains('hidden')) document.getElementById('records-list').innerHTML = records.slice(0, 20).map(r => `<div class="record-item"><strong>${r.data}</strong> — ${r.seuNome} — ${r.linha} — ${r.funcao} — ${r.produto}</div>`).join(''); }
+    function exportToExcel() { if (!filteredRecords.length) { showToast('Nenhum registro para exportar.'); return; } const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['data','seuNome','turno','linha','produto','embalagem','funcao']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','timestamp'].includes(k))]; let csv = ok.join(';') + '\n'; filteredRecords.forEach(r => { csv += ok.map(k => (r[k] !== undefined ? r[k] : '')).join(';') + '\n'; }); const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'corte_producao.csv'; a.click(); URL.revokeObjectURL(url); showToast('Exportado com sucesso!'); }
+  </script>
+</body>
+</html>
