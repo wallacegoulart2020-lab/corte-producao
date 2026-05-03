@@ -92,6 +92,7 @@
     }
     .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(92,158,255,0.15); }
     .form-input::placeholder { color: #4a5568; }
+    .form-input.error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(255,80,110,0.2); }
 
     select.form-select { position: absolute; opacity: 0; pointer-events: none; height: 0; width: 0; }
 
@@ -102,6 +103,7 @@
       transition: all var(--transition); cursor: pointer; text-align: left;
       position: relative; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     }
+    .custom-select-btn.error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(255,80,110,0.2); }
     .custom-select-btn:hover { border-color: rgba(92,158,255,0.4); background: rgba(255,255,255,0.05); }
     .custom-select-btn::after {
       content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
@@ -172,6 +174,7 @@
       backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       animation: fadeIn 0.25s ease-out;
     }
+    .modal-overlay-password { z-index: 1100; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes modalIn { from { opacity: 0; transform: scale(0.92) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     .modal {
@@ -383,6 +386,18 @@
     </div>
   </div>
 
+  <div id="modal-password" class="modal-overlay modal-overlay-password hidden">
+    <div class="modal">
+      <div class="modal-header"><span class="modal-icon">🔒</span><h3>Acesso Restrito</h3></div>
+      <p class="modal-desc">Digite a senha para continuar.</p>
+      <input type="password" id="modal-password-input" class="form-input" placeholder="••••••">
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closePasswordModal()">Cancelar</button>
+        <button class="btn-primary" onclick="confirmPasswordAction()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="modal-dashboard" class="modal-overlay hidden">
     <div class="modal modal-full">
       <div class="modal-header"><span class="modal-icon">📈</span><h3>Dados Registrados</h3><button class="modal-close-btn" onclick="closeDashboard()">✕</button></div>
@@ -412,6 +427,7 @@
       <div class="dashboard-stats">
         <span id="dashboard-stats-text"></span>
         <button class="btn-primary" onclick="exportToExcel()">📥 Exportar Excel</button>
+        <button class="btn-secondary" onclick="openPasswordModal('clearOldRecords')" style="font-size:11px;padding:6px 12px;">🧹 Limpar +6 meses</button>
       </div>
       <div class="dashboard-table-wrapper">
         <table class="dashboard-table"><thead id="dashboard-thead"></thead><tbody id="dashboard-tbody"></tbody></table>
@@ -465,7 +481,7 @@
       L512: {
         label: 'L512',
         secoes: {
-          Enchedora: { titulo: 'Enchedora e Medidores', icon: '🔧', campos: [{ id: 'enchedora', label: 'Enchedora', tipo: 'number' }, { id: 'medidor-vazao', label: 'Medidor de Vazão', tipo: 'number' }], subsecoes: [] },
+          Enchedora: { titulo: 'Enchedora e Medidores', icon: '🍺', campos: [{ id: 'enchedora', label: 'Enchedora', tipo: 'number' }, { id: 'medidor-vazao', label: 'Medidor de Vazão', tipo: 'number' }], subsecoes: [] },
           Inspetores: { titulo: 'Inspetores', icon: '🔍', campos: [], subsecoes: [
             { titulo: 'CHK 1', icon: '🔎', campos: [{ id: 'chk1-t', label: 'Total', tipo: 'number' }, { id: 'chk1-b', label: 'Boas', tipo: 'number' }, { id: 'chk1-m', label: 'Mal Cheias', tipo: 'number' }] },
             { titulo: 'Bbull 1', icon: '🔎', campos: [{ id: 'bb1-tl1', label: 'Total', tipo: 'number' }, { id: 'bb1-bl1', label: 'Boas', tipo: 'number' }, { id: 'bb1-ml1', label: 'Mal Cheias', tipo: 'number' }] },
@@ -473,13 +489,13 @@
             { titulo: 'Bbull 2', icon: '🔎', campos: [{ id: 'bb1-tl2', label: 'Total', tipo: 'number' }, { id: 'bb1-bl2', label: 'Boas', tipo: 'number' }, { id: 'bb1-ml2', label: 'Mal Cheias', tipo: 'number' }] }
           ]},
           Empacotadora: { titulo: 'Empacotadora', icon: '📦', campos: [{ id: 'khs-p', label: 'KHS (Pacotes)', tipo: 'number' }], subsecoes: [] },
-          Paletizadora: { titulo: 'Paletizadora', icon: '📦', campos: [{ id: 'pl05', label: 'PL 05', tipo: 'number' }, { id: 'pl06', label: 'PL 06', tipo: 'number' }, { id: 'fracao512', label: 'Fração', tipo: 'number', step: '0.01' }], subsecoes: [] }
+          Paletizadora: { titulo: 'Paletizadora', icon: '🏗️', campos: [{ id: 'pl05', label: 'PL 05', tipo: 'number' }, { id: 'pl06', label: 'PL 06', tipo: 'number' }, { id: 'fracao512', label: 'Fração', tipo: 'number', step: '0.01' }], subsecoes: [] }
         }
       },
       L513: {
         label: 'L513',
         secoes: {
-          Enchedora: { titulo: 'Enchedora e Medidores', icon: '🔧', campos: [{ id: 'enchedora', label: 'Enchedora', tipo: 'number' }, { id: 'medidor-vazao', label: 'Medidor de Vazão', tipo: 'number' }], subsecoes: [] },
+          Enchedora: { titulo: 'Enchedora e Medidores', icon: '🍺', campos: [{ id: 'enchedora', label: 'Enchedora', tipo: 'number' }, { id: 'medidor-vazao', label: 'Medidor de Vazão', tipo: 'number' }], subsecoes: [] },
           Inspetores: { titulo: 'Inspetores', icon: '🔍', campos: [], subsecoes: [
             { titulo: 'CHK 1', icon: '🔎', campos: [{ id: 'ic1-t', label: 'Total', tipo: 'number' }, { id: 'ic1-b', label: 'Boas', tipo: 'number' }, { id: 'ic1-m', label: 'Mal Cheias', tipo: 'number' }] },
             { titulo: 'Stratec 1', icon: '🔎', campos: [{ id: 'is1-t', label: 'Total', tipo: 'number' }, { id: 'is1-b', label: 'Boas', tipo: 'number' }, { id: 'is1-m', label: 'Mal Cheias', tipo: 'number' }] },
@@ -487,19 +503,19 @@
             { titulo: 'Stratec 2', icon: '🔎', campos: [{ id: 'is2-t', label: 'Total', tipo: 'number' }, { id: 'is2-b', label: 'Boas', tipo: 'number' }, { id: 'is2-m', label: 'Mal Cheias', tipo: 'number' }] }
           ]},
           Empacotadora: { titulo: 'Empacotadora', icon: '📦', campos: [{ id: 'khs-p2', label: 'KHS (Pacotes)', tipo: 'number' }, { id: 'em3', label: 'EPC Mead 3', tipo: 'number' }, { id: 'em4', label: 'EPC Mead 4', tipo: 'number' }], subsecoes: [] },
-          Paletizadora: { titulo: 'Paletizadora', icon: '📦', campos: [{ id: 'pl09', label: 'PL 09', tipo: 'number' }, { id: 'pl10', label: 'PL 10', tipo: 'number' }, { id: 'fracao513', label: 'Fração', tipo: 'number', step: '0.01' }], subsecoes: [] }
+          Paletizadora: { titulo: 'Paletizadora', icon: '🏗️', campos: [{ id: 'pl09', label: 'PL 09', tipo: 'number' }, { id: 'pl10', label: 'PL 10', tipo: 'number' }, { id: 'fracao513', label: 'Fração', tipo: 'number', step: '0.01' }], subsecoes: [] }
         }
       },
       L514: {
         label: 'L514',
         secoes: {
-          Enchedora: { titulo: 'Enchedora e Medidores', icon: '🔧', campos: [{ id: 'enchedora', label: 'Enchedora', tipo: 'number' }, { id: 'medidor-vazao', label: 'Medidor de Vazão', tipo: 'number' }], subsecoes: [] },
+          Enchedora: { titulo: 'Enchedora e Medidores', icon: '🍺', campos: [{ id: 'enchedora', label: 'Enchedora', tipo: 'number' }, { id: 'medidor-vazao', label: 'Medidor de Vazão', tipo: 'number' }], subsecoes: [] },
           Inspetores: { titulo: 'Inspetores', icon: '🔍', campos: [], subsecoes: [
             { titulo: 'Helf', icon: '🔎', campos: [{ id: 'ih-t', label: 'Total', tipo: 'number' }, { id: 'ih-b', label: 'Boas', tipo: 'number' }, { id: 'ih-m', label: 'Mal Cheias', tipo: 'number' }] },
             { titulo: 'Bbull', icon: '🔎', campos: [{ id: 'ib-t', label: 'Total', tipo: 'number' }, { id: 'ib-b', label: 'Boas', tipo: 'number' }, { id: 'ib-m', label: 'Mal Cheias', tipo: 'number' }] }
           ]},
           Empacotadora: { titulo: 'Empacotadora', icon: '📦', campos: [{ id: 'epc-m', label: 'EPC Mead', tipo: 'number' }, { id: 'epc-p', label: 'EPC Packmatic', tipo: 'number' }], subsecoes: [] },
-          Paletizadora: { titulo: 'Paletizadora', icon: '📦', campos: [{ id: 'pl3', label: 'PL 3', tipo: 'number' }, { id: 'pl4', label: 'PL 4', tipo: 'number' }, { id: 'fracao-pl', label: 'Fração PL', tipo: 'number', step: '0.01' }], subsecoes: [] }
+          Paletizadora: { titulo: 'Paletizadora', icon: '🏗️', campos: [{ id: 'pl3', label: 'PL 3', tipo: 'number' }, { id: 'pl4', label: 'PL 4', tipo: 'number' }, { id: 'fracao-pl', label: 'Fração PL', tipo: 'number', step: '0.01' }], subsecoes: [] }
         }
       }
     };
@@ -511,6 +527,7 @@
     let filteredRecords = [];
     let manageTab = 'produtos';
     let activeSelectEl = null;
+    let pendingPasswordAction = null;
 
     function buildCustomSelects() {
       document.querySelectorAll('select.form-select').forEach(select => {
@@ -592,6 +609,46 @@
       });
     }
 
+    function clearErrorStyles() {
+      document.querySelectorAll('.form-input.error, .custom-select-btn.error').forEach(el => el.classList.remove('error'));
+    }
+
+    function validateBasicFields() {
+      clearErrorStyles();
+      const fields = [
+        { id: 'data', type: 'input' },
+        { id: 'seu-nome', type: 'input' },
+        { id: 'turno', type: 'select' },
+        { id: 'linha', type: 'select' },
+        { id: 'produto', type: 'select' },
+        { id: 'embalagem', type: 'select' },
+        { id: 'funcao', type: 'select' }
+      ];
+      let valid = true;
+      for (const field of fields) {
+        const el = document.getElementById(field.id);
+        let value = '';
+        if (field.type === 'input') {
+          value = el.value.trim();
+        } else {
+          value = el.value;
+        }
+        if (!value) {
+          valid = false;
+          if (field.type === 'select') {
+            const wrapper = el.closest('.custom-select-wrapper');
+            if (wrapper) {
+              const btn = wrapper.querySelector('.custom-select-btn');
+              if (btn) btn.classList.add('error');
+            }
+          } else {
+            el.classList.add('error');
+          }
+        }
+      }
+      return valid;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => { document.getElementById('loading-screen').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); }, 700);
       const hoje = new Date();
@@ -645,16 +702,19 @@
       if (!cfg?.secoes[currentFuncao]) { container.innerHTML = '<p style="text-align:center;color:#ff506e;padding:20px;">Configuração não encontrada.</p>'; return; }
       const sec = cfg.secoes[currentFuncao];
       let html = `<div class="form-section"><div class="section-header"><span class="section-icon">${sec.icon}</span><h2 class="section-title">${sec.titulo} — ${cfg.label}</h2></div>`;
-      if (sec.campos?.length) { html += '<div class="form-grid">'; sec.campos.forEach(c => html += `<div class="form-group"><label class="form-label" for="${c.id}">${c.label}</label><input type="${c.tipo}" id="${c.id}" name="${c.id}" class="form-input" placeholder="0"${c.step ? ` step="${c.step}"` : ''}></div>`); html += '</div>'; }
+      if (sec.campos?.length) { html += '<div class="form-grid">'; sec.campos.forEach(c => html += `<div class="form-group"><label class="form-label" for="${c.id}">${c.label}</label><input type="${c.tipo}" id="${c.id}" name="${c.id}" class="form-input" placeholder="0" inputmode="numeric"${c.step ? ` step="${c.step}"` : ''}></div>`); html += '</div>'; }
       html += '</div>';
-      if (sec.subsecoes?.length) { sec.subsecoes.forEach(sub => { html += `<div class="form-section"><div class="section-header"><span class="section-icon">${sub.icon}</span><h2 class="section-title">${sub.titulo}</h2></div><div class="form-grid cols-3">`; sub.campos.forEach(c => html += `<div class="form-group"><label class="form-label" for="${c.id}">${c.label}</label><input type="${c.tipo}" id="${c.id}" name="${c.id}" class="form-input" placeholder="0"${c.step ? ` step="${c.step}"` : ''}></div>`); html += '</div></div>'; }); }
+      if (sec.subsecoes?.length) { sec.subsecoes.forEach(sub => { html += `<div class="form-section"><div class="section-header"><span class="section-icon">${sub.icon}</span><h2 class="section-title">${sub.titulo}</h2></div><div class="form-grid cols-3">`; sub.campos.forEach(c => html += `<div class="form-group"><label class="form-label" for="${c.id}">${c.label}</label><input type="${c.tipo}" id="${c.id}" name="${c.id}" class="form-input" placeholder="0" inputmode="numeric"${c.step ? ` step="${c.step}"` : ''}></div>`); html += '</div></div>'; }); }
       container.innerHTML = html;
     }
 
     async function onSubmit(e) {
       e.preventDefault();
+      if (!validateBasicFields()) {
+        showToast('Preencha todos os campos obrigatórios.');
+        return;
+      }
       const data = document.getElementById('data').value, seuNome = document.getElementById('seu-nome').value.trim(), turno = document.getElementById('turno').value, linha = document.getElementById('linha').value, produto = document.getElementById('produto').value, embalagem = document.getElementById('embalagem').value, funcao = document.getElementById('funcao').value;
-      if (!data || !seuNome || !turno || !linha || !produto || !embalagem || !funcao) { showAlert('Preencha todos os campos obrigatórios.'); return; }
       const dyn = {}; document.querySelectorAll('#dynamic-sections input').forEach(i => { if (i.value) dyn[i.name || i.id] = i.value; });
       try {
         await saveRecord({ data, seuNome, turno, linha, produto, embalagem, funcao, dyn });
@@ -729,6 +789,46 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = 'corte_producao.csv'; a.click(); URL.revokeObjectURL(url);
       showToast('Exportado com sucesso!');
+    }
+
+    // ========== EXCLUSÃO POR SENHA ==========
+    function openPasswordModal(action) {
+      pendingPasswordAction = action;
+      document.getElementById('modal-password-input').value = '';
+      document.getElementById('modal-password').classList.remove('hidden');
+    }
+    function closePasswordModal() { document.getElementById('modal-password').classList.add('hidden'); pendingPasswordAction = null; }
+    function confirmPasswordAction() {
+      const senha = document.getElementById('modal-password-input').value;
+      if (senha === '6033') {
+        closePasswordModal();
+        if (pendingPasswordAction === 'clearOldRecords') {
+          clearOldRecords();
+        }
+      } else {
+        showToast('Senha incorreta!');
+      }
+    }
+    async function clearOldRecords() {
+      try {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const isoDate = sixMonthsAgo.toISOString();
+        const oldRecords = allRecords.filter(r => new Date(r.savado_em) < sixMonthsAgo);
+        if (!oldRecords.length) {
+          showToast('Nenhum registro com mais de 6 meses.');
+          return;
+        }
+        for (const r of oldRecords) {
+          await sbFetch(`/registros?id=eq.${r.id}`, { method: 'DELETE' });
+        }
+        await loadAllRecords();
+        applyFilters();
+        showToast(`${oldRecords.length} registro(s) removido(s)!`);
+      } catch (e) {
+        console.error('Erro ao limpar registros:', e);
+        showToast('Erro ao remover registros.');
+      }
     }
   </script>
 </body>
