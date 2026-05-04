@@ -360,6 +360,68 @@
       "pl3": "pl3", "pl4": "pl4", "fracao-pl": "fracaoPl"
     };
 
+    // ─── MAPA DE COLUNAS ORDENADAS POR LINHA (somente display) ───────────────
+    const LINHA_COLUMNS = {
+      L512: [
+        { key: 'enchedora',      label: 'Enchedora' },
+        { key: 'medidorVazao',   label: 'Medidor de Vazão' },
+        { key: 'stratecTotalL1', label: 'CHK1 Total' },
+        { key: 'stratecBoasL1',  label: 'CHK1 Boas' },
+        { key: 'stratecMalL1',   label: 'CHK1 Mal Cheia' },
+        { key: 'bbullTotalL1',   label: 'Bbull1 Total' },
+        { key: 'bbullBoasL1',    label: 'Bbull1 Boas' },
+        { key: 'bbullMalL1',     label: 'Bbull1 Mal Cheia' },
+        { key: 'stratecTotalL2', label: 'CHK2 Total' },
+        { key: 'stratecBoasL2',  label: 'CHK2 Boas' },
+        { key: 'stratecMalL2',   label: 'CHK2 Mal Cheia' },
+        { key: 'bbullTotalL2',   label: 'Bbull2 Total' },
+        { key: 'bbullBoasL2',    label: 'Bbull2 Boas' },
+        { key: 'bbullMalL2',     label: 'Bbull2 Mal Cheia' },
+        { key: 'khsPacotes',     label: 'KHS Pacotes' },
+        { key: 'pl05',           label: 'PL 05' },
+        { key: 'pl06',           label: 'PL 06' },
+        { key: 'fracao',         label: 'Fração' }
+      ],
+      L513: [
+        { key: 'enchedora',      label: 'Enchedora' },
+        { key: 'medidorVazao',   label: 'Medidor de Vazão' },
+        { key: 'totalChk1',      label: 'CHK1 Total' },
+        { key: 'boasChk1',       label: 'CHK1 Boas' },
+        { key: 'malChk1',        label: 'CHK1 Mal Cheia' },
+        { key: 'totalStratec1',  label: 'Stratec1 Total' },
+        { key: 'boasStratec1',   label: 'Stratec1 Boas' },
+        { key: 'malStratec1',    label: 'Stratec1 Mal Cheia' },
+        { key: 'totalChk2',      label: 'CHK2 Total' },
+        { key: 'boasChk2',       label: 'CHK2 Boas' },
+        { key: 'malChk2',        label: 'CHK2 Mal Cheia' },
+        { key: 'totalStratec2',  label: 'Stratec2 Total' },
+        { key: 'boasStratec2',   label: 'Stratec2 Boas' },
+        { key: 'malStratec2',    label: 'Stratec2 Mal Cheia' },
+        { key: 'khsPacotes',     label: 'KHS Pacotes' },
+        { key: 'epcMead3',       label: 'EPC Mead 3' },
+        { key: 'epcMead4',       label: 'EPC Mead 4' },
+        { key: 'pl09',           label: 'PL 09' },
+        { key: 'pl10',           label: 'PL 10' },
+        { key: 'fracao513',      label: 'Fração' }
+      ],
+      L514: [
+        { key: 'enchedora',      label: 'Enchedora' },
+        { key: 'medidorVazao',   label: 'Medidor de Vazão' },
+        { key: 'totalHelf',      label: 'Total Helf' },
+        { key: 'boasHelf',       label: 'Boas Helf' },
+        { key: 'malHelf',        label: 'Mal Cheia Helf' },
+        { key: 'totalBbull',     label: 'Total Bbull' },
+        { key: 'boasBbull',      label: 'Boas Bbull' },
+        { key: 'malBbull',       label: 'Mal Cheia Bbull' },
+        { key: 'epcMead',        label: 'EPC Mead' },
+        { key: 'epcPackmatic',   label: 'EPC Packmatic' },
+        { key: 'pl3',            label: 'PL 3' },
+        { key: 'pl4',            label: 'PL 4' },
+        { key: 'fracaoPl',       label: 'Fração' }
+      ]
+    };
+    // ─────────────────────────────────────────────────────────────────────────
+
     const LINHA_CONFIG = {
       L512: { label: 'L512', secoes: {
         Enchedora: { titulo: 'Enchedora e Medidores', icon: '🍺', campos: [{ id: 'enchedora', label: 'Enchedora', tipo: 'number' }, { id: 'medidor-vazao', label: 'Medidor de Vazão', tipo: 'number' }], subsecoes: [] },
@@ -390,7 +452,7 @@
           { titulo: 'Bbull', icon: '🔎', campos: [{ id: 'ib-t', label: 'Total', tipo: 'number' }, { id: 'ib-b', label: 'Boas', tipo: 'number' }, { id: 'ib-m', label: 'Mal Cheias', tipo: 'number' }] }
         ]},
         Empacotadora: { titulo: 'Empacotadora', icon: '📦', campos: [{ id: 'epc-m', label: 'EPC Mead', tipo: 'number' }, { id: 'epc-p', label: 'EPC Packmatic', tipo: 'number' }], subsecoes: [] },
-        Paletizadora: { titulo: 'Paletizadora', icon: '🏗️', campos: [{ id: 'pl3', label: 'PL 3', label: 'PL 3', tipo: 'number' }, { id: 'pl4', label: 'PL 4', tipo: 'number' }, { id: 'fracao-pl', label: 'Fração PL', tipo: 'number', step: '0.01' }], subsecoes: [] }
+        Paletizadora: { titulo: 'Paletizadora', icon: '🏗️', campos: [{ id: 'pl3', label: 'PL 3', tipo: 'number' }, { id: 'pl4', label: 'PL 4', tipo: 'number' }, { id: 'fracao-pl', label: 'Fração', tipo: 'number', step: '0.01' }], subsecoes: [] }
       }}
     };
 
@@ -673,6 +735,35 @@
     async function openDashboard() { document.getElementById('modal-dashboard').classList.remove('hidden'); await loadAllRecords(); applyFilters(); }
     function closeDashboard() { document.getElementById('modal-dashboard').classList.add('hidden'); }
 
+    // ─── HELPER: monta colunas ordenadas para display/export ─────────────────
+    function buildDisplayColumns(lf) {
+      const pk = ['dados','horaReal','seuNome','turno','linha','produto','embalagem','maquina'];
+      const pkCols = pk
+        .filter(k => filteredRecords.some(r => r[k] !== null && r[k] !== undefined && r[k] !== '') || k === 'dados')
+        .map(k => ({ key: k, label: k === 'horaReal' ? 'Hora Real' : k }));
+
+      let dynCols;
+      if (lf && LINHA_COLUMNS[lf]) {
+        // Ordem e labels fixas — só inclui colunas que têm pelo menos 1 valor
+        dynCols = LINHA_COLUMNS[lf].filter(c =>
+          filteredRecords.some(r => r[c.key] !== null && r[c.key] !== undefined && r[c.key] !== '')
+        );
+      } else {
+        // Comportamento dinâmico original (sem filtro de linha)
+        const keys = new Set();
+        filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k)));
+        dynCols = Array.from(keys)
+          .filter(k => {
+            if (pk.includes(k) || ['id','savado_em','saved_at'].includes(k)) return false;
+            return filteredRecords.some(r => r[k] !== null && r[k] !== undefined && r[k] !== '');
+          })
+          .map(k => ({ key: k, label: k }));
+      }
+
+      return [...pkCols, ...dynCols];
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     function applyFilters() {
       const df = document.getElementById('filter-date').value, lf = document.getElementById('filter-linha').value;
       filteredRecords = allRecords.filter(r => {
@@ -690,21 +781,10 @@
       const tbody = document.getElementById('dashboard-tbody'), thead = document.getElementById('dashboard-thead'), empty = document.getElementById('dashboard-empty');
       if (!filteredRecords.length) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
       empty.classList.add('hidden');
-      
-      const keys = new Set();
-      filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k)));
-      const pk = ['dados','horaReal','seuNome','turno','linha','produto','embalagem','maquina'];
-      
-      const dynKeys = Array.from(keys).filter(k => {
-        if (pk.includes(k) || ['id','savado_em','saved_at'].includes(k)) return false;
-        return filteredRecords.some(r => r[k] !== null && r[k] !== undefined && r[k] !== '');
-      });
-      
-      const ok = [...pk.filter(k => keys.has(k)), ...dynKeys];
-      const formatHeader = (k) => k === 'horaReal' ? 'Hora Real' : k;
-      
-      thead.innerHTML = '<tr>' + ok.map(k => `<th>${formatHeader(k)}</th>`).join('') + '</tr>';
-      tbody.innerHTML = filteredRecords.map(r => '<tr>' + ok.map(k => `<td>${r[k] !== null && r[k] !== undefined ? r[k] : ''}</td>`).join('') + '</tr>').join('');
+
+      const cols = buildDisplayColumns(lf);
+      thead.innerHTML = '<tr>' + cols.map(c => `<th>${c.label}</th>`).join('') + '</tr>';
+      tbody.innerHTML = filteredRecords.map(r => '<tr>' + cols.map(c => `<td>${r[c.key] !== null && r[c.key] !== undefined ? r[c.key] : ''}</td>`).join('') + '</tr>').join('');
     }
 
     function clearFilters() { document.getElementById('filter-date').value = ''; document.getElementById('filter-linha').value = ''; buildCustomSelects(); applyFilters(); }
@@ -712,20 +792,11 @@
     
     function exportToExcel() {
       if (!filteredRecords.length) { showToast('Nenhum registro para exportar.'); return; }
-      const keys = new Set();
-      filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k)));
-      const pk = ['dados','horaReal','seuNome','turno','linha','produto','embalagem','maquina'];
-      
-      const dynKeys = Array.from(keys).filter(k => {
-        if (pk.includes(k) || ['id','savado_em','saved_at'].includes(k)) return false;
-        return filteredRecords.some(r => r[k] !== null && r[k] !== undefined && r[k] !== '');
-      });
-      const ok = [...pk.filter(k => keys.has(k)), ...dynKeys];
-      const formatHeader = (k) => k === 'horaReal' ? 'Hora Real' : k;
-      
-      let csv = ok.map(formatHeader).join(';') + '\n';
+      const lf = document.getElementById('filter-linha').value;
+      const cols = buildDisplayColumns(lf);
+      let csv = cols.map(c => c.label).join(';') + '\n';
       filteredRecords.forEach(r => {
-        csv += ok.map(k => (r[k] !== null && r[k] !== undefined ? r[k] : '')).join(';') + '\n';
+        csv += cols.map(c => (r[c.key] !== null && r[c.key] !== undefined ? r[c.key] : '')).join(';') + '\n';
       });
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
