@@ -168,6 +168,8 @@
       background: rgba(255,255,255,0.02); cursor: pointer; transition: var(--transition);
     }
     .gallery-card:hover { border-color: var(--primary); transform: scale(1.02); }
+    .gallery-card { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+    .gallery-card img { pointer-events: none; -webkit-user-drag: none; }
     .gallery-card-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: rgba(255,255,255,0.03); }
     .gallery-card-caption { padding: 6px 8px; font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
     .gallery-card-caption strong { color: var(--text); display: block; font-size: 11px; }
@@ -740,6 +742,7 @@ function attachLongPress() {
     let timer = null;
     let moved = false;
 
+    card.addEventListener('contextmenu', e => e.preventDefault());
     card.addEventListener('touchstart', e => {
       moved = false;
       card.classList.add('pressing');
@@ -750,7 +753,7 @@ function attachLongPress() {
           showDeleteConfirm(card.dataset.id, card.dataset.url);
         }
       }, 600);
-    }, { passive: true });
+    }, { passive: false });
 
     card.addEventListener('touchmove', () => {
       moved = true;
