@@ -185,7 +185,8 @@
       backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       animation: fadeIn 0.25s ease-out;
     }
-    .modal-overlay-password { z-index: 1100; } /* garante que a senha fique sobre o dashboard */
+    .modal-overlay-password { z-index: 1100; }
+    .modal-overlay-select { z-index: 1200; }
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes modalIn { from { opacity: 0; transform: scale(0.92) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
@@ -264,7 +265,6 @@
   </style>
 </head>
 <body>
-  <!-- LoadScreen, App, Modals (select, manage, password, dashboard, toast) idênticos à versão anterior, mas com ajuste no botão Limpar -->
   <div id="loading-screen" class="loading-screen">
     <div class="loading-logo"><div class="loading-icon">⚙️</div><h2>Corte de Produção</h2><div class="loading-bar"><div class="loading-fill"></div></div></div>
   </div>
@@ -295,11 +295,9 @@
     <div id="my-records" class="my-records hidden"><div class="section-header"><span class="section-icon">📝</span><h2 class="section-title">Registros Recentes</h2><button class="btn-close-records" onclick="toggleMyRecords()">✕</button></div><div id="records-list" class="records-list"></div></div>
   </div>
 
-  <!-- Modal de seleção customizado -->
-  <div id="modal-select" class="modal-overlay hidden"><div class="modal"><div class="modal-header"><span class="modal-icon">📋</span><h3 id="modal-select-title">Selecionar</h3><button class="modal-close-btn" onclick="closeSelectModal()">✕</button></div><div id="modal-select-content" class="select-modal-content"></div></div></div>
+  <div id="modal-select" class="modal-overlay modal-overlay-select hidden"><div class="modal"><div class="modal-header"><span class="modal-icon">📋</span><h3 id="modal-select-title">Selecionar</h3><button class="modal-close-btn" onclick="closeSelectModal()">✕</button></div><div id="modal-select-content" class="select-modal-content"></div></div></div>
   <div id="modal-manage-items" class="modal-overlay hidden"><div class="modal"><div class="modal-header"><span class="modal-icon">⚙️</span><h3>Gerenciar Listas</h3><button class="modal-close-btn" onclick="closeManageItemsModal()">✕</button></div><div style="display:flex;gap:12px;margin-bottom:12px;"><button class="btn-primary" id="tab-produtos-btn" onclick="switchManageTab('produtos')">Produtos</button><button class="btn-secondary" id="tab-embalagens-btn" onclick="switchManageTab('embalagens')">Embalagens</button></div><div class="form-grid" style="margin-bottom:12px;"><div class="form-group full-width"><input type="text" id="new-manage-item-input" class="form-input" placeholder="Novo item..."></div></div><button class="btn-primary" style="width:100%;margin-bottom:12px;" onclick="addManageItem()">➕ Adicionar</button><div id="manage-item-list" class="item-list"></div><div class="modal-actions"><button class="btn-secondary" onclick="closeManageItemsModal()">Fechar</button></div></div></div>
 
-  <!-- Modal de senha (COM z-index 1100) -->
   <div id="modal-password" class="modal-overlay modal-overlay-password hidden">
     <div class="modal">
       <div class="modal-header"><span class="modal-icon">🔒</span><h3>Acesso Restrito</h3></div>
@@ -309,7 +307,6 @@
     </div>
   </div>
 
-  <!-- Modal Dashboard (com botão Limpar ajustado) -->
   <div id="modal-dashboard" class="modal-overlay hidden">
     <div class="modal modal-full">
       <div class="modal-header"><span class="modal-icon">📈</span><h3>Dados Registrados</h3><button class="modal-close-btn" onclick="closeDashboard()">✕</button></div>
@@ -322,7 +319,6 @@
       <div class="dashboard-stats">
         <span id="dashboard-stats-text"></span>
         <button class="btn-primary" onclick="exportToExcel()">📥 Exportar Excel</button>
-        <!-- BOTÃO LIMPAR CORRIGIDO -->
         <button class="btn-secondary" onclick="event.stopPropagation(); openPasswordModal('clearOldRecords')" style="font-size:11px;padding:6px 12px;">🧹 Limpar +6 meses</button>
       </div>
       <div class="dashboard-table-wrapper">
@@ -335,7 +331,6 @@
   <div id="toast" class="toast hidden"></div>
 
   <script>
-    // ========== CONFIGURAÇÃO SUPABASE ==========
     const SUPABASE_URL = "https://ctuwpdtksivutnhtxezm.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dXdwZHRrc2l2dXRuaHR4ZXptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NDE2MTMsImV4cCI6MjA5MzMxNzYxM30._Odu5T16aSXeC7fzr1DBdHpStZhDlWI-kgABLMl2bGY";
     const headers = { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` };
@@ -395,7 +390,7 @@
           { titulo: 'Bbull', icon: '🔎', campos: [{ id: 'ib-t', label: 'Total', tipo: 'number' }, { id: 'ib-b', label: 'Boas', tipo: 'number' }, { id: 'ib-m', label: 'Mal Cheias', tipo: 'number' }] }
         ]},
         Empacotadora: { titulo: 'Empacotadora', icon: '📦', campos: [{ id: 'epc-m', label: 'EPC Mead', tipo: 'number' }, { id: 'epc-p', label: 'EPC Packmatic', tipo: 'number' }], subsecoes: [] },
-        Paletizadora: { titulo: 'Paletizadora', icon: '🏗️', campos: [{ id: 'pl3', label: 'PL 3', tipo: 'number' }, { id: 'pl4', label: 'PL 4', tipo: 'number' }, { id: 'fracao-pl', label: 'Fração PL', tipo: 'number', step: '0.01' }], subsecoes: [] }
+        Paletizadora: { titulo: 'Paletizadora', icon: '🏗️', campos: [{ id: 'pl3', label: 'PL 3', label: 'PL 3', tipo: 'number' }, { id: 'pl4', label: 'PL 4', tipo: 'number' }, { id: 'fracao-pl', label: 'Fração PL', tipo: 'number', step: '0.01' }], subsecoes: [] }
       }}
     };
 
@@ -409,7 +404,6 @@
     let pendingPasswordAction = null;
     let multiTargetInputs = [];
 
-    // ========== CÂMERA / OCR (VIA FOTO NATIVA) ==========
     function buildCameraButtons() {
       document.querySelectorAll('input[type="number"]').forEach(input => {
         const wrapper = input.closest('.input-camera-wrapper');
@@ -541,7 +535,6 @@
       overlay.addEventListener('click', (e) => { if (e.target === overlay) document.body.removeChild(overlay); });
     }
 
-    // ========== CUSTOM SELECTS ==========
     function buildCustomSelects() {
       document.querySelectorAll('select.form-select:not([id^="select-"])').forEach(select => {
         const wrapper = select.closest('.custom-select-wrapper'); if (!wrapper) return;
@@ -573,11 +566,11 @@
     }
     function closeSelectModal() { document.getElementById('modal-select').classList.add('hidden'); activeSelectEl = null; }
 
-    // ========== SUPABASE ==========
     async function loadAllRecords() {
       try { const records = await sbFetch("/registros?order=savado_em.desc"); allRecords = records.map(r => ({ id: r.id, ...r })); }
       catch (e) { console.error('Erro ao carregar registros:', e); allRecords = []; }
     }
+    
     async function saveRecord(data) {
       const row = {};
       row.dados = data.data; row.seuNome = data.seuNome; row.turno = data.turno; row.linha = data.linha;
@@ -679,12 +672,68 @@
 
     async function openDashboard() { document.getElementById('modal-dashboard').classList.remove('hidden'); await loadAllRecords(); applyFilters(); }
     function closeDashboard() { document.getElementById('modal-dashboard').classList.add('hidden'); }
-    function applyFilters() { const df = document.getElementById('filter-date').value, lf = document.getElementById('filter-linha').value; filteredRecords = allRecords.filter(r => { if (df && r.dados !== df) return false; if (lf && r.linha !== lf) return false; return true; }); document.getElementById('dashboard-stats-text').innerHTML = `<strong>${filteredRecords.length}</strong> registro(s)`; const tbody = document.getElementById('dashboard-tbody'), thead = document.getElementById('dashboard-thead'), empty = document.getElementById('dashboard-empty'); if (!filteredRecords.length) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; } empty.classList.add('hidden'); const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['dados','seuNome','turno','linha','produto','embalagem','maquina']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))]; thead.innerHTML = '<tr>' + ok.map(k => `<th>${k}</th>`).join('') + '</tr>'; tbody.innerHTML = filteredRecords.map(r => '<tr>' + ok.map(k => `<td>${r[k] || ''}</td>`).join('') + '</tr>').join(''); }
+
+    function applyFilters() {
+      const df = document.getElementById('filter-date').value, lf = document.getElementById('filter-linha').value;
+      filteredRecords = allRecords.filter(r => {
+        if (df && r.dados !== df) return false;
+        if (lf && r.linha !== lf) return false;
+        return true;
+      }).map(r => {
+        if (r.savado_em || r.saved_at) {
+          const d = new Date(r.savado_em || r.saved_at);
+          r.horaReal = d.toLocaleString('pt-BR');
+        }
+        return r;
+      });
+      document.getElementById('dashboard-stats-text').innerHTML = `<strong>${filteredRecords.length}</strong> registro(s)`;
+      const tbody = document.getElementById('dashboard-tbody'), thead = document.getElementById('dashboard-thead'), empty = document.getElementById('dashboard-empty');
+      if (!filteredRecords.length) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      
+      const keys = new Set();
+      filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k)));
+      const pk = ['dados','horaReal','seuNome','turno','linha','produto','embalagem','maquina'];
+      
+      const dynKeys = Array.from(keys).filter(k => {
+        if (pk.includes(k) || ['id','savado_em','saved_at'].includes(k)) return false;
+        return filteredRecords.some(r => r[k] !== null && r[k] !== undefined && r[k] !== '');
+      });
+      
+      const ok = [...pk.filter(k => keys.has(k)), ...dynKeys];
+      const formatHeader = (k) => k === 'horaReal' ? 'Hora Real' : k;
+      
+      thead.innerHTML = '<tr>' + ok.map(k => `<th>${formatHeader(k)}</th>`).join('') + '</tr>';
+      tbody.innerHTML = filteredRecords.map(r => '<tr>' + ok.map(k => `<td>${r[k] !== null && r[k] !== undefined ? r[k] : ''}</td>`).join('') + '</tr>').join('');
+    }
+
     function clearFilters() { document.getElementById('filter-date').value = ''; document.getElementById('filter-linha').value = ''; buildCustomSelects(); applyFilters(); }
     function toggleMyRecords() { const d = document.getElementById('my-records'); d.classList.toggle('hidden'); if (!d.classList.contains('hidden')) document.getElementById('records-list').innerHTML = allRecords.slice(0, 20).map(r => `<div class="record-item"><strong>${r.dados}</strong> — ${r.seuNome} — ${r.linha} — ${r.maquina || r["máquina"]} — ${r.produto}</div>`).join(''); }
-    function exportToExcel() { if (!filteredRecords.length) { showToast('Nenhum registro para exportar.'); return; } const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['dados','seuNome','turno','linha','produto','embalagem','maquina']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))]; let csv = ok.join(';') + '\n'; filteredRecords.forEach(r => { csv += ok.map(k => (r[k] !== undefined ? r[k] : '')).join(';') + '\n'; }); const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'corte_producao.csv'; a.click(); URL.revokeObjectURL(url); showToast('Exportado com sucesso!'); }
+    
+    function exportToExcel() {
+      if (!filteredRecords.length) { showToast('Nenhum registro para exportar.'); return; }
+      const keys = new Set();
+      filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k)));
+      const pk = ['dados','horaReal','seuNome','turno','linha','produto','embalagem','maquina'];
+      
+      const dynKeys = Array.from(keys).filter(k => {
+        if (pk.includes(k) || ['id','savado_em','saved_at'].includes(k)) return false;
+        return filteredRecords.some(r => r[k] !== null && r[k] !== undefined && r[k] !== '');
+      });
+      const ok = [...pk.filter(k => keys.has(k)), ...dynKeys];
+      const formatHeader = (k) => k === 'horaReal' ? 'Hora Real' : k;
+      
+      let csv = ok.map(formatHeader).join(';') + '\n';
+      filteredRecords.forEach(r => {
+        csv += ok.map(k => (r[k] !== null && r[k] !== undefined ? r[k] : '')).join(';') + '\n';
+      });
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'corte_producao.csv'; a.click();
+      URL.revokeObjectURL(url);
+      showToast('Exportado com sucesso!');
+    }
 
-    // ========== EXCLUSÃO POR SENHA (CORRIGIDA) ==========
     function openPasswordModal(action) {
       pendingPasswordAction = action;
       document.getElementById('modal-password-input').value = '';
