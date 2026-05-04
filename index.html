@@ -22,7 +22,6 @@
     }
   </script>
   <style>
-    /* ... todo o CSS permanece exatamente igual ... */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --bg: #06080d; --glass: rgba(18, 23, 31, 0.65); --glass-border: rgba(255, 255, 255, 0.08);
@@ -253,7 +252,6 @@
   </style>
 </head>
 <body>
-  <!-- ... restante do body permanece igual ... -->
   <div id="loading-screen" class="loading-screen">
     <div class="loading-logo">
       <div class="loading-icon">⚙️</div>
@@ -691,425 +689,106 @@
       try { const records = await sbFetch("/registros?order=savado_em.desc"); allRecords = records.map(r => ({ id: r.id, ...r })); }
       catch (e) { console.error('Erro ao carregar registros:', e); allRecords = []; }
     }
-
-    // ✅ CORREÇÃO 1: row.maquina (sem acento) + CORREÇÃO 2: conversão para number/null
     async function saveRecord(data) {
-      const row = {};
-      row.dados = data.data;
-      row.seuNome = data.seuNome;
-      row.turno = data.turno;
-      row.linha = data.linha;
-      row.produto = data.produto;
-      row.embalagem = data.embalagem;
-      row.maquina = data.funcao;   // <--- sem acento
-      row.savado_em = new Date().toISOString();
-
-      Object.entries(data.dyn).forEach(([key, value]) => {
-        const col = FIELD_MAP[key] || key;
-        // valor vazio ou undefined vira null, senão Number
-        row[col] = (value === '' || value === undefined) ? null : Number(value);
-      });
-
-      await sbFetch("/registros", {
-        method: "POST",
-        headers: { "Prefer": "return=representation" },
-        body: JSON.stringify(row)
-      });
+      const row = {}; row.dados = data.data; row.seuNome = data.seuNome; row.turno = data.turno; row.linha = data.linha;
+      row.produto = data.produto; row.embalagem = data.embalagem; row["máquina"] = data.funcao; row.savado_em = new Date().toISOString();
+      Object.entries(data.dyn).forEach(([key, value]) => { const col = FIELD_MAP[key] || key; row[col] = value; });
+      await sbFetch("/registros", { method: "POST", headers: { "Prefer": "return=representation" }, body: JSON.stringify(row) });
     }
-
-    function clearErrorStyles() {
-      document.querySelectorAll('.form-input.error, .custom-select-btn.error').forEach(el => el.classList.remove('error'));
-    }
+    function clearErrorStyles() { document.querySelectorAll('.form-input.error, .custom-select-btn.error').forEach(el => el.classList.remove('error')); }
     function validateBasicFields() {
       clearErrorStyles();
-      const fields = [
-        { id: 'data', type: 'input' },
-        { id: 'seu-nome', type: 'input' },
-        { id: 'turno', type: 'select' },
-        { id: 'linha', type: 'select' },
-        { id: 'produto', type: 'select' },
-        { id: 'embalagem', type: 'select' },
-        { id: 'funcao', type: 'select' }
-      ];
+      const fields = [{ id: 'data', type: 'input' }, { id: 'seu-nome', type: 'input' }, { id: 'turno', type: 'select' }, { id: 'linha', type: 'select' }, { id: 'produto', type: 'select' }, { id: 'embalagem', type: 'select' }, { id: 'funcao', type: 'select' }];
       let valid = true;
       for (const field of fields) {
-        const el = document.getElementById(field.id);
-        let value = field.type === 'input' ? el.value.trim() : el.value;
-        if (!value) {
-          valid = false;
-          if (field.type === 'select') {
-            const wrapper = el.closest('.custom-select-wrapper');
-            if (wrapper) {
-              const btn = wrapper.querySelector('.custom-select-btn');
-              if (btn) btn.classList.add('error');
-            }
-          } else {
-            el.classList.add('error');
-          }
-        }
+        const el = document.getElementById(field.id); let value = field.type === 'input' ? el.value.trim() : el.value;
+        if (!value) { valid = false; if (field.type === 'select') { const wrapper = el.closest('.custom-select-wrapper'); if (wrapper) { const btn = wrapper.querySelector('.custom-select-btn'); if (btn) btn.classList.add('error'); } } else { el.classList.add('error'); } }
       }
       return valid;
     }
 
-    // ✅ CORREÇÃO 3: toast mostra a mensagem real do erro
-    async function onSubmit(e) {
-      e.preventDefault();
-      if (!validateBasicFields()) {
-        showToast('Preencha todos os campos obrigatórios.');
-        return;
-      }
-      const data = document.getElementById('data').value,
-            seuNome = document.getElementById('seu-nome').value.trim(),
-            turno = document.getElementById('turno').value,
-            linha = document.getElementById('linha').value,
-            produto = document.getElementById('produto').value,
-            embalagem = document.getElementById('embalagem').value,
-            funcao = document.getElementById('funcao').value;
-
-      // Coleta todos os campos dinâmicos (mesmo vazios, para tratarmos como null)
-      const dyn = {};
-      document.querySelectorAll('#dynamic-sections input').forEach(i => {
-        dyn[i.name || i.id] = i.value;
-      });
-
-      try {
-        await saveRecord({ data, seuNome, turno, linha, produto, embalagem, funcao, dyn });
-        await loadAllRecords();
-        showToast('Registro salvo! ✅');
-        document.getElementById('production-form').reset();
-        document.getElementById('data').value = new Date().toLocaleDateString('pt-BR');
-        document.getElementById('dynamic-sections').innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>';
-        currentLinha = null;
-        currentFuncao = null;
-        buildCustomSelects();
-      } catch (e) {
-        // Exibe o erro exato retornado pelo Supabase
-        showToast('Erro: ' + e.message);
-        console.error(e);
-      }
-    }
-
     document.addEventListener('DOMContentLoaded', async () => {
-      setTimeout(() => {
-        document.getElementById('loading-screen').classList.add('hidden');
-        document.getElementById('app').classList.remove('hidden');
-      }, 700);
-      const hoje = new Date();
-      document.getElementById('data').value = hoje.toLocaleDateString('pt-BR');
+      setTimeout(() => { document.getElementById('loading-screen').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); }, 700);
+      const hoje = new Date(); document.getElementById('data').value = hoje.toLocaleDateString('pt-BR');
       document.getElementById('header-date').textContent = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-      populateSelect('produto', PRODUTOS);
-      populateSelect('embalagem', EMBALAGENS);
-      buildCustomSelects();
-
-      document.getElementById('linha').addEventListener('change', onLinhaChange);
-      document.getElementById('funcao').addEventListener('change', onFuncaoChange);
-      document.getElementById('production-form').addEventListener('submit', onSubmit);
-      document.getElementById('btn-dados').addEventListener('click', openDashboard);
-      document.getElementById('date-toggle-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleCalendar('data', 'calendar-popup');
-      });
-      document.getElementById('filter-date-toggle').addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleCalendar('filter-date', 'filter-calendar-popup');
-      });
-      document.getElementById('btn-add-produto').addEventListener('click', () => {
-        manageTab = 'produtos';
-        openManageItemsModal();
-      });
-      document.getElementById('btn-add-embalagem').addEventListener('click', () => {
-        manageTab = 'embalagens';
-        openManageItemsModal();
-      });
+      populateSelect('produto', PRODUTOS); populateSelect('embalagem', EMBALAGENS); buildCustomSelects();
+      document.getElementById('linha').addEventListener('change', onLinhaChange); document.getElementById('funcao').addEventListener('change', onFuncaoChange);
+      document.getElementById('production-form').addEventListener('submit', onSubmit); document.getElementById('btn-dados').addEventListener('click', openDashboard);
+      document.getElementById('date-toggle-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleCalendar('data', 'calendar-popup'); });
+      document.getElementById('filter-date-toggle').addEventListener('click', (e) => { e.stopPropagation(); toggleCalendar('filter-date', 'filter-calendar-popup'); });
+      document.getElementById('btn-add-produto').addEventListener('click', () => { manageTab = 'produtos'; openManageItemsModal(); });
+      document.getElementById('btn-add-embalagem').addEventListener('click', () => { manageTab = 'embalagens'; openManageItemsModal(); });
       document.getElementById('dynamic-sections').innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>';
-
       let titleClicks = 0, titleTimer = null;
-      document.getElementById('header-title').addEventListener('click', () => {
-        titleClicks++;
-        if (titleClicks === 1) {
-          titleTimer = setTimeout(() => { titleClicks = 0; }, 1500);
-        } else if (titleClicks === 3) {
-          clearTimeout(titleTimer);
-          titleClicks = 0;
-          manageTab = 'produtos';
-          openManageItemsModal();
-        }
-      });
-
-      document.querySelectorAll('.modal-overlay').forEach(o => {
-        o.addEventListener('click', e => { if (e.target === o) o.classList.add('hidden'); });
-      });
-      document.addEventListener('click', (e) => {
-        if (!e.target.closest('.date-input-wrapper')) {
-          document.querySelectorAll('.calendar-popup').forEach(c => c.classList.add('hidden'));
-        }
-      });
-
+      document.getElementById('header-title').addEventListener('click', () => { titleClicks++; if (titleClicks === 1) { titleTimer = setTimeout(() => { titleClicks = 0; }, 1500); } else if (titleClicks === 3) { clearTimeout(titleTimer); titleClicks = 0; manageTab = 'produtos'; openManageItemsModal(); } });
+      document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.add('hidden'); }));
+      document.addEventListener('click', (e) => { if (!e.target.closest('.date-input-wrapper')) document.querySelectorAll('.calendar-popup').forEach(c => c.classList.add('hidden')); });
       await loadAllRecords();
     });
 
     function populateSelect(id, items) {
-      const s = document.getElementById(id);
-      const placeholder = id === 'produto' ? 'Selecione o produto' : 'Selecione a embalagem';
-      s.innerHTML = `<option value="">${placeholder}</option>`;
-      items.forEach(i => {
-        const o = document.createElement('option');
-        o.value = i;
-        o.textContent = i;
-        s.appendChild(o);
-      });
+      const s = document.getElementById(id); const placeholder = id === 'produto' ? 'Selecione o produto' : 'Selecione a embalagem';
+      s.innerHTML = `<option value="">${placeholder}</option>`; items.forEach(i => { const o = document.createElement('option'); o.value = i; o.textContent = i; s.appendChild(o); });
       setTimeout(buildCustomSelects, 50);
     }
-
-    function onLinhaChange(e) {
-      currentLinha = e.target.value;
-      document.getElementById('funcao').value = '';
-      currentFuncao = null;
-      buildCustomSelects();
-      document.getElementById('dynamic-sections').innerHTML = currentLinha
-        ? '<p class="info-text">Agora selecione <strong>Qual sua Máquina?</strong></p>'
-        : '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>';
-    }
-
-    function onFuncaoChange(e) {
-      currentFuncao = e.target.value;
-      renderDynamicSections();
-    }
+    function onLinhaChange(e) { currentLinha = e.target.value; document.getElementById('funcao').value = ''; currentFuncao = null; buildCustomSelects(); document.getElementById('dynamic-sections').innerHTML = currentLinha ? '<p class="info-text">Agora selecione <strong>Qual sua Máquina?</strong></p>' : '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>'; }
+    function onFuncaoChange(e) { currentFuncao = e.target.value; renderDynamicSections(); }
 
     function renderDynamicSections() {
       const container = document.getElementById('dynamic-sections');
-      if (!currentLinha || !currentFuncao) {
-        container.innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>';
-        return;
-      }
-      const cfg = LINHA_CONFIG[currentLinha];
-      if (!cfg || !cfg.secoes[currentFuncao]) {
-        container.innerHTML = '<p style="text-align:center;color:#ff506e;padding:20px;">Configuração não encontrada.</p>';
-        return;
-      }
+      if (!currentLinha || !currentFuncao) { container.innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>'; return; }
+      const cfg = LINHA_CONFIG[currentLinha]; if (!cfg?.secoes[currentFuncao]) { container.innerHTML = '<p style="text-align:center;color:#ff506e;padding:20px;">Configuração não encontrada.</p>'; return; }
       const sec = cfg.secoes[currentFuncao];
       let html = `<div class="form-section"><div class="section-header"><span class="section-icon">${sec.icon}</span><h2 class="section-title">${sec.titulo} — ${cfg.label}</h2></div>`;
-      if (sec.campos && sec.campos.length) {
-        html += '<div class="form-grid">';
-        sec.campos.forEach(c => {
-          html += `<div class="form-group"><label class="form-label" for="${c.id}">${c.label}</label><input type="${c.tipo}" id="${c.id}" name="${c.id}" class="form-input" placeholder="0" inputmode="numeric"${c.step ? ` step="${c.step}"` : ''}></div>`;
-        });
-        html += '</div>';
-      }
+      if (sec.campos?.length) { html += '<div class="form-grid">'; sec.campos.forEach(c => { html += `<div class="form-group"><label class="form-label" for="${c.id}">${c.label}</label><input type="${c.tipo}" id="${c.id}" name="${c.id}" class="form-input" placeholder="0" inputmode="numeric"${c.step ? ` step="${c.step}"` : ''}></div>`; }); html += '</div>'; }
       html += '</div>';
-      if (sec.subsecoes && sec.subsecoes.length) {
-        sec.subsecoes.forEach(sub => {
-          const ids = sub.campos.map(c => c.id);
-          html += `<div class="form-section"><div class="section-header"><span class="section-icon">${sub.icon}</span><h2 class="section-title">${sub.titulo}</h2><button type="button" class="btn-camera-group" data-targets='${JSON.stringify(ids)}'>📷 Capturar todos</button></div><div class="form-grid cols-3">`;
-          sub.campos.forEach(c => {
-            html += `<div class="form-group"><label class="form-label" for="${c.id}">${c.label}</label><input type="${c.tipo}" id="${c.id}" name="${c.id}" class="form-input" placeholder="0" inputmode="numeric"${c.step ? ` step="${c.step}"` : ''}></div>`;
-          });
-          html += '</div></div>';
-        });
-      }
-      container.innerHTML = html;
-      attachGroupCameraEvents();
-      setTimeout(buildCameraButtons, 50);
+      if (sec.subsecoes?.length) { sec.subsecoes.forEach(sub => { const ids = sub.campos.map(c => c.id); html += `<div class="form-section"><div class="section-header"><span class="section-icon">${sub.icon}</span><h2 class="section-title">${sub.titulo}</h2><button type="button" class="btn-camera-group" data-targets='${JSON.stringify(ids)}'>📷 Capturar todos</button></div><div class="form-grid cols-3">`; sub.campos.forEach(c => { html += `<div class="form-group"><label class="form-label" for="${c.id}">${c.label}</label><input type="${c.tipo}" id="${c.id}" name="${c.id}" class="form-input" placeholder="0" inputmode="numeric"${c.step ? ` step="${c.step}"` : ''}></div>`; }); html += '</div></div>'; }); }
+      container.innerHTML = html; attachGroupCameraEvents(); setTimeout(buildCameraButtons, 50);
     }
 
     function attachGroupCameraEvents() {
       document.querySelectorAll('.btn-camera-group').forEach(btn => {
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        newBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const targets = JSON.parse(newBtn.dataset.targets);
-          openNativeCameraGroup(targets);
-        });
+        const newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener('click', (e) => { e.preventDefault(); const targets = JSON.parse(newBtn.dataset.targets); openNativeCameraGroup(targets); });
       });
     }
 
-    function showToast(m) {
-      const t = document.getElementById('toast');
-      t.textContent = m;
-      t.classList.remove('hidden');
-      setTimeout(() => t.classList.add('hidden'), 2500);
+    async function onSubmit(e) {
+      e.preventDefault(); if (!validateBasicFields()) { showToast('Preencha todos os campos obrigatórios.'); return; }
+      const data = document.getElementById('data').value, seuNome = document.getElementById('seu-nome').value.trim(), turno = document.getElementById('turno').value,
+            linha = document.getElementById('linha').value, produto = document.getElementById('produto').value, embalagem = document.getElementById('embalagem').value, funcao = document.getElementById('funcao').value;
+      const dyn = {}; document.querySelectorAll('#dynamic-sections input').forEach(i => { if (i.value) dyn[i.name || i.id] = i.value; });
+      try { await saveRecord({ data, seuNome, turno, linha, produto, embalagem, funcao, dyn }); await loadAllRecords(); showToast('Registro salvo! ✅');
+        document.getElementById('production-form').reset(); document.getElementById('data').value = new Date().toLocaleDateString('pt-BR');
+        document.getElementById('dynamic-sections').innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>'; currentLinha = null; currentFuncao = null; buildCustomSelects();
+      } catch (e) { showToast('Erro ao salvar. Tente novamente.'); console.error(e); }
     }
-    function showAlert(m) {
-      const b = document.getElementById('alert-banner');
-      document.getElementById('alert-text').textContent = m;
-      b.classList.remove('hidden');
-      setTimeout(() => b.classList.add('hidden'), 4000);
-    }
+
+    function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 2500); }
+    function showAlert(m) { const b = document.getElementById('alert-banner'); document.getElementById('alert-text').textContent = m; b.classList.remove('hidden'); setTimeout(() => b.classList.add('hidden'), 4000); }
     function closeAlert() { document.getElementById('alert-banner').classList.add('hidden'); }
 
-    function toggleCalendar(inpId, popId) {
-      const popup = document.getElementById(popId);
-      document.querySelectorAll('.calendar-popup').forEach(c => { if (c !== popup) c.classList.add('hidden'); });
-      if (popup.classList.contains('hidden')) {
-        renderCalendar(inpId, popId);
-        popup.classList.remove('hidden');
-      } else popup.classList.add('hidden');
-    }
-    function renderCalendar(inpId, popId) {
-      const h = new Date(), m = h.getMonth(), a = h.getFullYear(),
-            dias = new Date(a, m + 1, 0).getDate(),
-            pd = new Date(a, m, 1).getDay();
-      let html = `<div class="cal-header"><span>${h.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</span></div><div class="cal-grid">`;
-      ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(d => html += `<div style="font-weight:600;font-size:10px">${d}</div>`);
-      for (let i = 0; i < pd; i++) html += '<div></div>';
-      for (let d = 1; d <= dias; d++) html += `<div class="cal-day${d === h.getDate() ? ' today' : ''}" onclick="selectDate('${inpId}','${popId}',${d})">${d}</div>`;
-      html += '</div>';
-      document.getElementById(popId).innerHTML = html;
-    }
-    function selectDate(inpId, popId, dia) {
-      const h = new Date();
-      document.getElementById(inpId).value = new Date(h.getFullYear(), h.getMonth(), dia).toLocaleDateString('pt-BR');
-      document.getElementById(popId).classList.add('hidden');
-    }
+    function toggleCalendar(inpId, popId) { const popup = document.getElementById(popId); document.querySelectorAll('.calendar-popup').forEach(c => { if (c !== popup) c.classList.add('hidden'); }); if (popup.classList.contains('hidden')) { renderCalendar(inpId, popId); popup.classList.remove('hidden'); } else popup.classList.add('hidden'); }
+    function renderCalendar(inpId, popId) { const h = new Date(), m = h.getMonth(), a = h.getFullYear(), dias = new Date(a, m + 1, 0).getDate(), pd = new Date(a, m, 1).getDay(); let html = `<div class="cal-header"><span>${h.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</span></div><div class="cal-grid">`; ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(d => html += `<div style="font-weight:600;font-size:10px">${d}</div>`); for (let i = 0; i < pd; i++) html += '<div></div>'; for (let d = 1; d <= dias; d++) html += `<div class="cal-day${d === h.getDate() ? ' today' : ''}" onclick="selectDate('${inpId}','${popId}',${d})">${d}</div>`; html += '</div>'; document.getElementById(popId).innerHTML = html; }
+    function selectDate(inpId, popId, dia) { const h = new Date(); document.getElementById(inpId).value = new Date(h.getFullYear(), h.getMonth(), dia).toLocaleDateString('pt-BR'); document.getElementById(popId).classList.add('hidden'); }
 
     function openManageItemsModal() { document.getElementById('modal-manage-items').classList.remove('hidden'); switchManageTab(manageTab); }
     function closeManageItemsModal() { document.getElementById('modal-manage-items').classList.add('hidden'); }
-    function switchManageTab(tab) {
-      manageTab = tab;
-      document.getElementById('tab-produtos-btn').className = tab === 'produtos' ? 'btn-primary' : 'btn-secondary';
-      document.getElementById('tab-embalagens-btn').className = tab === 'embalagens' ? 'btn-primary' : 'btn-secondary';
-      renderManageList();
-    }
-    function renderManageList() {
-      const list = manageTab === 'produtos' ? PRODUTOS : EMBALAGENS;
-      document.getElementById('manage-item-list').innerHTML = list.map((item, i) =>
-        `<div class="item-row"><span>${item}</span><button class="item-remove" onclick="removeManageItem(${i})">✕</button></div>`
-      ).join('');
-    }
-    function addManageItem() {
-      const v = document.getElementById('new-manage-item-input').value.trim();
-      if (!v) return;
-      if (manageTab === 'produtos') {
-        PRODUTOS.push(v);
-        localStorage.setItem('produtos_list', JSON.stringify(PRODUTOS));
-        populateSelect('produto', PRODUTOS);
-      } else {
-        EMBALAGENS.push(v);
-        localStorage.setItem('embalagens_list', JSON.stringify(EMBALAGENS));
-        populateSelect('embalagem', EMBALAGENS);
-      }
-      document.getElementById('new-manage-item-input').value = '';
-      renderManageList();
-      showToast('Item adicionado!');
-    }
-    function removeManageItem(i) {
-      if (manageTab === 'produtos') {
-        PRODUTOS.splice(i, 1);
-        localStorage.setItem('produtos_list', JSON.stringify(PRODUTOS));
-        populateSelect('produto', PRODUTOS);
-      } else {
-        EMBALAGENS.splice(i, 1);
-        localStorage.setItem('embalagens_list', JSON.stringify(EMBALAGENS));
-        populateSelect('embalagem', EMBALAGENS);
-      }
-      renderManageList();
-    }
+    function switchManageTab(tab) { manageTab = tab; document.getElementById('tab-produtos-btn').className = tab === 'produtos' ? 'btn-primary' : 'btn-secondary'; document.getElementById('tab-embalagens-btn').className = tab === 'embalagens' ? 'btn-primary' : 'btn-secondary'; renderManageList(); }
+    function renderManageList() { const list = manageTab === 'produtos' ? PRODUTOS : EMBALAGENS; document.getElementById('manage-item-list').innerHTML = list.map((item, i) => `<div class="item-row"><span>${item}</span><button class="item-remove" onclick="removeManageItem(${i})">✕</button></div>`).join(''); }
+    function addManageItem() { const v = document.getElementById('new-manage-item-input').value.trim(); if (!v) return; if (manageTab === 'produtos') { PRODUTOS.push(v); localStorage.setItem('produtos_list', JSON.stringify(PRODUTOS)); populateSelect('produto', PRODUTOS); } else { EMBALAGENS.push(v); localStorage.setItem('embalagens_list', JSON.stringify(EMBALAGENS)); populateSelect('embalagem', EMBALAGENS); } document.getElementById('new-manage-item-input').value = ''; renderManageList(); showToast('Item adicionado!'); }
+    function removeManageItem(i) { if (manageTab === 'produtos') { PRODUTOS.splice(i, 1); localStorage.setItem('produtos_list', JSON.stringify(PRODUTOS)); populateSelect('produto', PRODUTOS); } else { EMBALAGENS.splice(i, 1); localStorage.setItem('embalagens_list', JSON.stringify(EMBALAGENS)); populateSelect('embalagem', EMBALAGENS); } renderManageList(); }
 
     async function openDashboard() { document.getElementById('modal-dashboard').classList.remove('hidden'); await loadAllRecords(); applyFilters(); }
     function closeDashboard() { document.getElementById('modal-dashboard').classList.add('hidden'); }
-    function applyFilters() {
-      const df = document.getElementById('filter-date').value,
-            lf = document.getElementById('filter-linha').value;
-      filteredRecords = allRecords.filter(r => {
-        if (df && r.dados !== df) return false;
-        if (lf && r.linha !== lf) return false;
-        return true;
-      });
-      document.getElementById('dashboard-stats-text').innerHTML = `<strong>${filteredRecords.length}</strong> registro(s)`;
-      const tbody = document.getElementById('dashboard-tbody'),
-            thead = document.getElementById('dashboard-thead'),
-            empty = document.getElementById('dashboard-empty');
-      if (!filteredRecords.length) {
-        thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden');
-        return;
-      }
-      empty.classList.add('hidden');
-      const keys = new Set();
-      filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k)));
-      const pk = ['dados','seuNome','turno','linha','produto','embalagem','maquina']; // <-- note "maquina" sem acento
-      const ok = [
-        ...pk.filter(k => keys.has(k)),
-        ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))
-      ];
-      thead.innerHTML = '<tr>' + ok.map(k => `<th>${k}</th>`).join('') + '</tr>';
-      tbody.innerHTML = filteredRecords.map(r =>
-        '<tr>' + ok.map(k => `<td>${r[k] || ''}</td>`).join('') + '</tr>'
-      ).join('');
-    }
-    function clearFilters() {
-      document.getElementById('filter-date').value = '';
-      document.getElementById('filter-linha').value = '';
-      buildCustomSelects();
-      applyFilters();
-    }
-    function toggleMyRecords() {
-      const d = document.getElementById('my-records');
-      d.classList.toggle('hidden');
-      if (!d.classList.contains('hidden')) {
-        document.getElementById('records-list').innerHTML = allRecords.slice(0, 20).map(r =>
-          `<div class="record-item"><strong>${r.dados}</strong> — ${r.seuNome} — ${r.linha} — ${r.maquina} — ${r.produto}</div>`
-        ).join('');
-      }
-    }
-    function exportToExcel() {
-      if (!filteredRecords.length) { showToast('Nenhum registro para exportar.'); return; }
-      const keys = new Set();
-      filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k)));
-      const pk = ['dados','seuNome','turno','linha','produto','embalagem','maquina']; // sem acento
-      const ok = [
-        ...pk.filter(k => keys.has(k)),
-        ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))
-      ];
-      let csv = ok.join(';') + '\n';
-      filteredRecords.forEach(r => {
-        csv += ok.map(k => (r[k] !== undefined ? r[k] : '')).join(';') + '\n';
-      });
-      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'corte_producao.csv';
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('Exportado com sucesso!');
-    }
-    function openPasswordModal(action) {
-      pendingPasswordAction = action;
-      document.getElementById('modal-password-input').value = '';
-      document.getElementById('modal-password').classList.remove('hidden');
-    }
-    function closePasswordModal() {
-      document.getElementById('modal-password').classList.add('hidden');
-      pendingPasswordAction = null;
-    }
-    function confirmPasswordAction() {
-      const senha = document.getElementById('modal-password-input').value;
-      if (senha === '6033') {
-        closePasswordModal();
-        if (pendingPasswordAction === 'clearOldRecords') clearOldRecords();
-      } else showToast('Senha incorreta!');
-    }
-    async function clearOldRecords() {
-      try {
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-        const oldRecords = allRecords.filter(r => new Date(r.savado_em) < sixMonthsAgo);
-        if (!oldRecords.length) {
-          showToast('Nenhum registro com mais de 6 meses.');
-          return;
-        }
-        for (const r of oldRecords) {
-          await sbFetch(`/registros?id=eq.${r.id}`, { method: 'DELETE' });
-        }
-        await loadAllRecords();
-        applyFilters();
-        showToast(`${oldRecords.length} registro(s) removido(s)!`);
-      } catch (e) {
-        console.error('Erro ao limpar registros:', e);
-        showToast('Erro ao remover registros.');
-      }
-    }
+    function applyFilters() { const df = document.getElementById('filter-date').value, lf = document.getElementById('filter-linha').value; filteredRecords = allRecords.filter(r => { if (df && r.dados !== df) return false; if (lf && r.linha !== lf) return false; return true; }); document.getElementById('dashboard-stats-text').innerHTML = `<strong>${filteredRecords.length}</strong> registro(s)`; const tbody = document.getElementById('dashboard-tbody'), thead = document.getElementById('dashboard-thead'), empty = document.getElementById('dashboard-empty'); if (!filteredRecords.length) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; } empty.classList.add('hidden'); const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['dados','seuNome','turno','linha','produto','embalagem','máquina']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))]; thead.innerHTML = '<tr>' + ok.map(k => `<th>${k}</th>`).join('') + '</tr>'; tbody.innerHTML = filteredRecords.map(r => '<tr>' + ok.map(k => `<td>${r[k] || ''}</td>`).join('') + '</tr>').join(''); }
+    function clearFilters() { document.getElementById('filter-date').value = ''; document.getElementById('filter-linha').value = ''; buildCustomSelects(); applyFilters(); }
+    function toggleMyRecords() { const d = document.getElementById('my-records'); d.classList.toggle('hidden'); if (!d.classList.contains('hidden')) document.getElementById('records-list').innerHTML = allRecords.slice(0, 20).map(r => `<div class="record-item"><strong>${r.dados}</strong> — ${r.seuNome} — ${r.linha} — ${r["máquina"]} — ${r.produto}</div>`).join(''); }
+    function exportToExcel() { if (!filteredRecords.length) { showToast('Nenhum registro para exportar.'); return; } const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['dados','seuNome','turno','linha','produto','embalagem','máquina']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))]; let csv = ok.join(';') + '\n'; filteredRecords.forEach(r => { csv += ok.map(k => (r[k] !== undefined ? r[k] : '')).join(';') + '\n'; }); const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'corte_producao.csv'; a.click(); URL.revokeObjectURL(url); showToast('Exportado com sucesso!'); }
+    function openPasswordModal(action) { pendingPasswordAction = action; document.getElementById('modal-password-input').value = ''; document.getElementById('modal-password').classList.remove('hidden'); }
+    function closePasswordModal() { document.getElementById('modal-password').classList.add('hidden'); pendingPasswordAction = null; }
+    function confirmPasswordAction() { const senha = document.getElementById('modal-password-input').value; if (senha === '6033') { closePasswordModal(); if (pendingPasswordAction === 'clearOldRecords') clearOldRecords(); } else showToast('Senha incorreta!'); }
+    async function clearOldRecords() { try { const sixMonthsAgo = new Date(); sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6); const oldRecords = allRecords.filter(r => new Date(r.savado_em) < sixMonthsAgo); if (!oldRecords.length) { showToast('Nenhum registro com mais de 6 meses.'); return; } for (const r of oldRecords) { await sbFetch(`/registros?id=eq.${r.id}`, { method: 'DELETE' }); } await loadAllRecords(); applyFilters(); showToast(`${oldRecords.length} registro(s) removido(s)!`); } catch (e) { console.error('Erro ao limpar registros:', e); showToast('Erro ao remover registros.'); } }
 
     setTimeout(buildCameraButtons, 200);
   </script>
