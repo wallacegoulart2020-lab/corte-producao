@@ -144,6 +144,8 @@
     .btn-primary { padding: 10px 20px; border-radius: 20px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--primary); color: #fff; transition: var(--transition); }
     .btn-primary:hover { background: var(--primary-dark); }
     .btn-secondary { padding: 10px 20px; border-radius: 20px; border: 1px solid var(--glass-border); font-size: 13px; font-weight: 600; cursor: pointer; background: rgba(255,255,255,0.04); color: var(--text); transition: var(--transition); }
+    .btn-danger { padding: 10px 20px; border-radius: 20px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--danger); color: #fff; transition: var(--transition); }
+    .gallery-card.pressing { opacity: 0.6; transform: scale(0.95); transition: transform 0.1s, opacity 0.1s; }
     .btn-secondary:hover { background: rgba(255,255,255,0.08); }
     /* Select modal */
     .select-modal-content { max-height: 55vh; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; margin: 8px 0; }
@@ -268,6 +270,19 @@
     <div id="photo-slots-container"><p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p></div>
     <div class="form-submit-area"><button type="submit" class="btn-submit" id="btn-submit">💾 Salvar Fotos</button></div>
   </form>
+</div>
+
+<!-- Delete confirm modal -->
+<div id="modal-delete-confirm" class="modal-overlay modal-overlay-password hidden">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-icon">🗑️</span><h3>Apagar foto?</h3></div>
+    <img id="delete-confirm-preview" src="" alt="foto" style="width:100%;border-radius:10px;margin-bottom:14px;max-height:200px;object-fit:cover;">
+    <p class="modal-desc">Esta foto será removida da galeria e do servidor. Não tem como desfazer.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="document.getElementById('modal-delete-confirm').classList.add('hidden')">Cancelar</button>
+      <button class="btn-danger" onclick="confirmDeletePhoto()">Apagar</button>
+    </div>
+  </div>
 </div>
 
 <!-- Select modal -->
@@ -637,7 +652,6 @@ async function loadAndRenderGallery() {
 
 function renderGallery(fotos, linhaFiltro) {
   const content = document.getElementById('gallery-content');
-  // Group by machine section
   const grouped = {};
   fotos.forEach(f => {
     const section = SLOT_TO_SECTION[f.maquina] || f.maquina;
@@ -653,7 +667,10 @@ function renderGallery(fotos, linhaFiltro) {
       <div class="gallery-machine-title">${MACHINE_ICONS[machine]||'📷'} ${machine}</div>
       <div class="gallery-grid">
         ${items.map(f => `
-          <div class="gallery-card" onclick="openFullScreen('${f.url}')">
+          <div class="gallery-card"
+            data-id="${f.id}"
+            data-url="${f.url}"
+            onclick="handleCardClick(event, '${f.url}')">
             <img class="gallery-card-img" src="${f.url}" loading="lazy" alt="${f.maquina}">
             <div class="gallery-card-caption">
               <strong>${f.maquina}</strong>
@@ -665,6 +682,7 @@ function renderGallery(fotos, linhaFiltro) {
     </div>`;
   });
   content.innerHTML = html || '<p class="gallery-empty">Nenhuma foto.</p>';
+  attachLongPress();
 }
 
 function clearGalleryFilters() {
@@ -708,6 +726,81 @@ async function confirmDelete() {
   } catch(err) {
     hideUploadOverlay();
     showToast('Erro ao deletar: ' + err.message);
+    console.error(err);
+  }
+}
+
+// ── Long press delete ─────────────────────────────────────────────────────────
+let pendingDeleteId = null;
+let pendingDeleteUrl = null;
+let longPressBlocked = false;
+
+function attachLongPress() {
+  document.querySelectorAll('.gallery-card').forEach(card => {
+    let timer = null;
+    let moved = false;
+
+    card.addEventListener('touchstart', e => {
+      moved = false;
+      card.classList.add('pressing');
+      timer = setTimeout(() => {
+        if (!moved) {
+          longPressBlocked = true;
+          card.classList.remove('pressing');
+          showDeleteConfirm(card.dataset.id, card.dataset.url);
+        }
+      }, 600);
+    }, { passive: true });
+
+    card.addEventListener('touchmove', () => {
+      moved = true;
+      clearTimeout(timer);
+      card.classList.remove('pressing');
+    }, { passive: true });
+
+    card.addEventListener('touchend', () => {
+      clearTimeout(timer);
+      card.classList.remove('pressing');
+    });
+
+    card.addEventListener('touchcancel', () => {
+      clearTimeout(timer);
+      card.classList.remove('pressing');
+    });
+  });
+}
+
+function handleCardClick(e, url) {
+  if (longPressBlocked) { longPressBlocked = false; return; }
+  openFullScreen(url);
+}
+
+function showDeleteConfirm(id, url) {
+  pendingDeleteId = id;
+  pendingDeleteUrl = url;
+  document.getElementById('delete-confirm-preview').src = url;
+  document.getElementById('modal-delete-confirm').classList.remove('hidden');
+}
+
+async function confirmDeletePhoto() {
+  document.getElementById('modal-delete-confirm').classList.add('hidden');
+  if (!pendingDeleteId || !pendingDeleteUrl) return;
+  showUploadOverlay('Apagando foto...');
+  try {
+    const marker = '/object/public/fotos-corte/';
+    const idx = pendingDeleteUrl.indexOf(marker);
+    if (idx >= 0) {
+      const path = pendingDeleteUrl.substring(idx + marker.length);
+      await deleteFromStorage([path]);
+    }
+    await dbFetch(`/fotos?id=eq.${pendingDeleteId}`, { method: 'DELETE' });
+    hideUploadOverlay();
+    showToast('Foto apagada! ✅');
+    pendingDeleteId = null; pendingDeleteUrl = null;
+    await loadAndRenderGallery();
+  } catch(err) {
+    hideUploadOverlay();
+    showToast('Erro ao apagar: ' + err.message);
     console.error(err);
   }
 }
