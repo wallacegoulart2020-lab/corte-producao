@@ -179,10 +179,22 @@
     .record-item { padding: 12px; border: 1px solid var(--glass-border); border-radius: var(--radius-sm); margin-bottom: 8px; cursor: pointer; transition: var(--transition); font-size: 13px; background: rgba(255,255,255,0.02); }
     .record-item:hover { border-color: var(--primary-dark); background: rgba(92,158,255,0.05); }
 
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); animation: fadeIn 0.25s ease-out; }
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      animation: fadeIn 0.25s ease-out;
+    }
+    .modal-overlay-password { z-index: 1100; } /* garante que a senha fique sobre o dashboard */
+
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes modalIn { from { opacity: 0; transform: scale(0.92) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-    .modal { background: var(--glass-hover); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05); border: 1px solid var(--glass-border); animation: modalIn 0.3s ease-out; }
+    .modal {
+      background: var(--glass-hover); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+      border-radius: var(--radius); padding: 24px; width: 100%; max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border); animation: modalIn 0.3s ease-out;
+    }
     .modal-wide { max-width: 600px; max-height: 80vh; overflow-y: auto; }
     .modal-full { max-width: 95vw; max-height: 90vh; overflow-y: auto; }
     .modal-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -252,134 +264,43 @@
   </style>
 </head>
 <body>
+  <!-- LoadScreen, App, Modals (select, manage, password, dashboard, toast) idênticos à versão anterior, mas com ajuste no botão Limpar -->
   <div id="loading-screen" class="loading-screen">
-    <div class="loading-logo">
-      <div class="loading-icon">⚙️</div>
-      <h2>Corte de Produção</h2>
-      <div class="loading-bar"><div class="loading-fill"></div></div>
-    </div>
+    <div class="loading-logo"><div class="loading-icon">⚙️</div><h2>Corte de Produção</h2><div class="loading-bar"><div class="loading-fill"></div></div></div>
   </div>
-
   <div id="app" class="app hidden">
     <header class="header">
-      <div class="header-left">
-        <div class="header-icon">🏭</div>
-        <div>
-          <h1 class="header-title" id="header-title">Corte de Produção</h1>
-          <p class="header-subtitle" id="header-date"></p>
-        </div>
-      </div>
+      <div class="header-left"><div class="header-icon">🏭</div><div><h1 class="header-title" id="header-title">Corte de Produção</h1><p class="header-subtitle" id="header-date"></p></div></div>
       <button id="btn-dados" class="btn-dados">Dados</button>
     </header>
-
-    <div id="alert-banner" class="alert-banner hidden">
-      <span class="alert-icon">⚠️</span> <span id="alert-text"></span>
-      <button class="alert-close" onclick="closeAlert()">✕</button>
-    </div>
-
+    <div id="alert-banner" class="alert-banner hidden"><span class="alert-icon">⚠️</span> <span id="alert-text"></span><button class="alert-close" onclick="closeAlert()">✕</button></div>
     <main class="main-content">
       <form id="production-form" novalidate>
         <div class="form-section">
           <div class="section-header"><span class="section-icon">📋</span><h2 class="section-title">Informações Básicas</h2></div>
           <div class="form-grid">
-            <div class="form-group full-width">
-              <label class="form-label required" for="data">Data</label>
-              <div class="date-input-wrapper">
-                <input type="text" id="data" name="data" class="form-input" placeholder="DD/MM/AAAA" readonly>
-                <button type="button" class="date-toggle-btn" id="date-toggle-btn">📅</button>
-                <div id="calendar-popup" class="calendar-popup hidden"></div>
-              </div>
-            </div>
+            <div class="form-group full-width"><label class="form-label required" for="data">Data</label><div class="date-input-wrapper"><input type="text" id="data" name="data" class="form-input" placeholder="DD/MM/AAAA" readonly><button type="button" class="date-toggle-btn" id="date-toggle-btn">📅</button><div id="calendar-popup" class="calendar-popup hidden"></div></div></div>
             <div class="form-group"><label class="form-label required" for="seu-nome">Seu Nome</label><input type="text" id="seu-nome" name="seu-nome" class="form-input" placeholder="Nome completo"></div>
-            <div class="form-group">
-              <label class="form-label required" for="turno">Turno</label>
-              <div id="wrapper-turno" class="custom-select-wrapper">
-                <select id="turno" name="turno" class="form-select" data-placeholder="Selecione o turno">
-                  <option value="">Selecione o turno</option>
-                  <option value="Turno 1">Turno 1</option>
-                  <option value="Turno 2">Turno 2</option>
-                  <option value="Turno 3">Turno 3</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label required" for="linha">Qual Linha?</label>
-              <div id="wrapper-linha" class="custom-select-wrapper">
-                <select id="linha" name="linha" class="form-select" data-placeholder="Selecione a linha">
-                  <option value="">Selecione a linha</option>
-                  <option value="L512">L512</option>
-                  <option value="L513">L513</option>
-                  <option value="L514">L514</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label required" for="produto">Produto</label>
-              <div class="select-add-wrapper">
-                <div id="wrapper-produto" class="custom-select-wrapper" style="flex:1"><select id="produto" name="produto" class="form-select" data-placeholder="Selecione o produto"></select></div>
-                <button type="button" class="btn-add-item" id="btn-add-produto">＋</button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label required" for="embalagem">Embalagem</label>
-              <div class="select-add-wrapper">
-                <div id="wrapper-embalagem" class="custom-select-wrapper" style="flex:1"><select id="embalagem" name="embalagem" class="form-select" data-placeholder="Selecione a embalagem"></select></div>
-                <button type="button" class="btn-add-item" id="btn-add-embalagem">＋</button>
-              </div>
-            </div>
-            <div class="form-group full-width">
-              <label class="form-label required" for="funcao">Qual sua Máquina?</label>
-              <div id="wrapper-funcao" class="custom-select-wrapper">
-                <select id="funcao" name="funcao" class="form-select" data-placeholder="Selecione a função">
-                  <option value="">Selecione a função</option>
-                  <option value="Enchedora">Enchedora</option>
-                  <option value="Inspetores">Inspetores</option>
-                  <option value="Empacotadora">Empacotadora</option>
-                  <option value="Paletizadora">Paletizadora</option>
-                </select>
-              </div>
-            </div>
+            <div class="form-group"><label class="form-label required" for="turno">Turno</label><div id="wrapper-turno" class="custom-select-wrapper"><select id="turno" name="turno" class="form-select" data-placeholder="Selecione o turno"><option value="">Selecione o turno</option><option value="Turno 1">Turno 1</option><option value="Turno 2">Turno 2</option><option value="Turno 3">Turno 3</option></select></div></div>
+            <div class="form-group"><label class="form-label required" for="linha">Qual Linha?</label><div id="wrapper-linha" class="custom-select-wrapper"><select id="linha" name="linha" class="form-select" data-placeholder="Selecione a linha"><option value="">Selecione a linha</option><option value="L512">L512</option><option value="L513">L513</option><option value="L514">L514</option></select></div></div>
+            <div class="form-group"><label class="form-label required" for="produto">Produto</label><div class="select-add-wrapper"><div id="wrapper-produto" class="custom-select-wrapper" style="flex:1"><select id="produto" name="produto" class="form-select" data-placeholder="Selecione o produto"></select></div><button type="button" class="btn-add-item" id="btn-add-produto">＋</button></div></div>
+            <div class="form-group"><label class="form-label required" for="embalagem">Embalagem</label><div class="select-add-wrapper"><div id="wrapper-embalagem" class="custom-select-wrapper" style="flex:1"><select id="embalagem" name="embalagem" class="form-select" data-placeholder="Selecione a embalagem"></select></div><button type="button" class="btn-add-item" id="btn-add-embalagem">＋</button></div></div>
+            <div class="form-group full-width"><label class="form-label required" for="funcao">Qual sua Máquina?</label><div id="wrapper-funcao" class="custom-select-wrapper"><select id="funcao" name="funcao" class="form-select" data-placeholder="Selecione a função"><option value="">Selecione a função</option><option value="Enchedora">Enchedora</option><option value="Inspetores">Inspetores</option><option value="Empacotadora">Empacotadora</option><option value="Paletizadora">Paletizadora</option></select></div></div>
           </div>
         </div>
-
         <div id="dynamic-sections"></div>
-
-        <div class="form-submit-area">
-          <button type="submit" class="btn-submit" id="btn-submit">
-            <span class="btn-submit-icon">💾</span> <span>Salvar Registro</span>
-          </button>
-        </div>
+        <div class="form-submit-area"><button type="submit" class="btn-submit" id="btn-submit"><span class="btn-submit-icon">💾</span> <span>Salvar Registro</span></button></div>
       </form>
     </main>
-
-    <div id="my-records" class="my-records hidden">
-      <div class="section-header"><span class="section-icon">📝</span><h2 class="section-title">Registros Recentes</h2><button class="btn-close-records" onclick="toggleMyRecords()">✕</button></div>
-      <div id="records-list" class="records-list"></div>
-    </div>
+    <div id="my-records" class="my-records hidden"><div class="section-header"><span class="section-icon">📝</span><h2 class="section-title">Registros Recentes</h2><button class="btn-close-records" onclick="toggleMyRecords()">✕</button></div><div id="records-list" class="records-list"></div></div>
   </div>
 
-  <div id="modal-select" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-header"><span class="modal-icon">📋</span><h3 id="modal-select-title">Selecionar</h3><button class="modal-close-btn" onclick="closeSelectModal()">✕</button></div>
-      <div id="modal-select-content" class="select-modal-content"></div>
-    </div>
-  </div>
+  <!-- Modal de seleção customizado -->
+  <div id="modal-select" class="modal-overlay hidden"><div class="modal"><div class="modal-header"><span class="modal-icon">📋</span><h3 id="modal-select-title">Selecionar</h3><button class="modal-close-btn" onclick="closeSelectModal()">✕</button></div><div id="modal-select-content" class="select-modal-content"></div></div></div>
+  <div id="modal-manage-items" class="modal-overlay hidden"><div class="modal"><div class="modal-header"><span class="modal-icon">⚙️</span><h3>Gerenciar Listas</h3><button class="modal-close-btn" onclick="closeManageItemsModal()">✕</button></div><div style="display:flex;gap:12px;margin-bottom:12px;"><button class="btn-primary" id="tab-produtos-btn" onclick="switchManageTab('produtos')">Produtos</button><button class="btn-secondary" id="tab-embalagens-btn" onclick="switchManageTab('embalagens')">Embalagens</button></div><div class="form-grid" style="margin-bottom:12px;"><div class="form-group full-width"><input type="text" id="new-manage-item-input" class="form-input" placeholder="Novo item..."></div></div><button class="btn-primary" style="width:100%;margin-bottom:12px;" onclick="addManageItem()">➕ Adicionar</button><div id="manage-item-list" class="item-list"></div><div class="modal-actions"><button class="btn-secondary" onclick="closeManageItemsModal()">Fechar</button></div></div></div>
 
-  <div id="modal-manage-items" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-header"><span class="modal-icon">⚙️</span><h3>Gerenciar Listas</h3><button class="modal-close-btn" onclick="closeManageItemsModal()">✕</button></div>
-      <div style="display:flex;gap:12px;margin-bottom:12px;">
-        <button class="btn-primary" id="tab-produtos-btn" onclick="switchManageTab('produtos')">Produtos</button>
-        <button class="btn-secondary" id="tab-embalagens-btn" onclick="switchManageTab('embalagens')">Embalagens</button>
-      </div>
-      <div class="form-grid" style="margin-bottom:12px;"><div class="form-group full-width"><input type="text" id="new-manage-item-input" class="form-input" placeholder="Novo item..."></div></div>
-      <button class="btn-primary" style="width:100%;margin-bottom:12px;" onclick="addManageItem()">➕ Adicionar</button>
-      <div id="manage-item-list" class="item-list"></div>
-      <div class="modal-actions"><button class="btn-secondary" onclick="closeManageItemsModal()">Fechar</button></div>
-    </div>
-  </div>
-
-  <div id="modal-password" class="modal-overlay hidden">
+  <!-- Modal de senha (COM z-index 1100) -->
+  <div id="modal-password" class="modal-overlay modal-overlay-password hidden">
     <div class="modal">
       <div class="modal-header"><span class="modal-icon">🔒</span><h3>Acesso Restrito</h3></div>
       <p class="modal-desc">Digite a senha para continuar.</p>
@@ -388,36 +309,21 @@
     </div>
   </div>
 
+  <!-- Modal Dashboard (com botão Limpar ajustado) -->
   <div id="modal-dashboard" class="modal-overlay hidden">
     <div class="modal modal-full">
       <div class="modal-header"><span class="modal-icon">📈</span><h3>Dados Registrados</h3><button class="modal-close-btn" onclick="closeDashboard()">✕</button></div>
       <div class="dashboard-filters">
-        <div class="filter-group">
-          <label class="form-label">Data</label>
-          <div class="date-input-wrapper">
-            <input type="text" id="filter-date" class="form-input" placeholder="DD/MM/AAAA" readonly>
-            <button type="button" class="date-toggle-btn" id="filter-date-toggle">📅</button>
-            <div id="filter-calendar-popup" class="calendar-popup hidden"></div>
-          </div>
-        </div>
-        <div class="filter-group">
-          <label class="form-label">Linha</label>
-          <div id="wrapper-filter-linha" class="custom-select-wrapper">
-            <select id="filter-linha" class="form-select" data-placeholder="Todas as linhas">
-              <option value="">Todas as linhas</option>
-              <option value="L512">L512</option>
-              <option value="L513">L513</option>
-              <option value="L514">L514</option>
-            </select>
-          </div>
-        </div>
+        <div class="filter-group"><label class="form-label">Data</label><div class="date-input-wrapper"><input type="text" id="filter-date" class="form-input" placeholder="DD/MM/AAAA" readonly><button type="button" class="date-toggle-btn" id="filter-date-toggle">📅</button><div id="filter-calendar-popup" class="calendar-popup hidden"></div></div></div>
+        <div class="filter-group"><label class="form-label">Linha</label><div id="wrapper-filter-linha" class="custom-select-wrapper"><select id="filter-linha" class="form-select" data-placeholder="Todas as linhas"><option value="">Todas as linhas</option><option value="L512">L512</option><option value="L513">L513</option><option value="L514">L514</option></select></div></div>
         <button class="btn-primary" onclick="applyFilters()">🔍 Filtrar</button>
         <button class="btn-secondary" onclick="clearFilters()">↺ Limpar</button>
       </div>
       <div class="dashboard-stats">
         <span id="dashboard-stats-text"></span>
         <button class="btn-primary" onclick="exportToExcel()">📥 Exportar Excel</button>
-        <button class="btn-secondary" onclick="openPasswordModal('clearOldRecords')" style="font-size:11px;padding:6px 12px;">🧹 Limpar +6 meses</button>
+        <!-- BOTÃO LIMPAR CORRIGIDO -->
+        <button class="btn-secondary" onclick="event.stopPropagation(); openPasswordModal('clearOldRecords')" style="font-size:11px;padding:6px 12px;">🧹 Limpar +6 meses</button>
       </div>
       <div class="dashboard-table-wrapper">
         <table class="dashboard-table"><thead id="dashboard-thead"></thead><tbody id="dashboard-tbody"></tbody></table>
@@ -429,6 +335,7 @@
   <div id="toast" class="toast hidden"></div>
 
   <script>
+    // ========== CONFIGURAÇÃO SUPABASE ==========
     const SUPABASE_URL = "https://ctuwpdtksivutnhtxezm.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0dXdwZHRrc2l2dXRuaHR4ZXptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NDE2MTMsImV4cCI6MjA5MzMxNzYxM30._Odu5T16aSXeC7fzr1DBdHpStZhDlWI-kgABLMl2bGY";
     const headers = { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` };
@@ -522,15 +429,8 @@
       });
     }
 
-    function openNativeCamera(inputEl) {
-      multiTargetInputs = [inputEl.id];
-      triggerFileInput();
-    }
-
-    function openNativeCameraGroup(targetIds) {
-      multiTargetInputs = targetIds;
-      triggerFileInput();
-    }
+    function openNativeCamera(inputEl) { multiTargetInputs = [inputEl.id]; triggerFileInput(); }
+    function openNativeCameraGroup(targetIds) { multiTargetInputs = targetIds; triggerFileInput(); }
 
     function triggerFileInput() {
       const fileInput = document.createElement('input');
@@ -584,21 +484,15 @@
           if (numbers.length === targetIds.length) {
             targetIds.forEach((id, i) => fillInputById(id, numbers[i]));
             showToast('3 campos preenchidos! ✅');
-          } else {
-            showMultiNumberPicker(numbers, targetIds);
-          }
+          } else { showMultiNumberPicker(numbers, targetIds); }
         }
       } catch (err) { console.error('Erro ao processar imagem:', err); showToast('Erro ao processar. Tente novamente.'); }
     }
 
-    function fillInputById(id, value) {
-      const input = document.getElementById(id);
-      if (input) { input.value = value; input.dispatchEvent(new Event('input', { bubbles: true })); }
-    }
+    function fillInputById(id, value) { const input = document.getElementById(id); if (input) { input.value = value; input.dispatchEvent(new Event('input', { bubbles: true })); } }
 
     function showNumberPicker(numbers, targetIds) {
-      const existing = document.getElementById('modal-number-picker');
-      if (existing) existing.remove();
+      const existing = document.getElementById('modal-number-picker'); if (existing) existing.remove();
       const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.id = 'modal-number-picker'; overlay.style.zIndex = '4000';
       const modal = document.createElement('div'); modal.className = 'modal';
       modal.innerHTML = `<div class="modal-header"><span class="modal-icon">🔢</span><h3>Escolha o número</h3></div><div class="select-modal-content" id="picker-list"></div><div class="modal-actions"><button class="btn-secondary" id="picker-cancel">Cancelar</button></div>`;
@@ -610,8 +504,7 @@
     }
 
     function showMultiNumberPicker(numbers, targetIds) {
-      const existing = document.getElementById('modal-number-picker');
-      if (existing) existing.remove();
+      const existing = document.getElementById('modal-number-picker'); if (existing) existing.remove();
       const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.id = 'modal-number-picker'; overlay.style.zIndex = '4000';
       const modal = document.createElement('div'); modal.className = 'modal';
       const fields = targetIds.map(id => {
@@ -621,14 +514,11 @@
       modal.innerHTML = `<div class="modal-header"><span class="modal-icon">🔢</span><h3>Distribua os números (${numbers.length} encontrados)</h3></div>${fields}<div class="modal-actions"><button class="btn-secondary" id="picker-cancel-multi">Cancelar</button><button class="btn-primary" id="picker-confirm-multi">✅ Preencher todos</button></div>`;
       overlay.appendChild(modal); document.body.appendChild(overlay);
       modal.querySelectorAll('select.form-select').forEach(select => {
-        const wrapper = document.createElement('div'); wrapper.className = 'custom-select-wrapper';
-        select.parentNode.insertBefore(wrapper, select); wrapper.appendChild(select);
-        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'custom-select-btn';
-        btn.textContent = select.options[0].textContent;
+        const wrapper = document.createElement('div'); wrapper.className = 'custom-select-wrapper'; select.parentNode.insertBefore(wrapper, select); wrapper.appendChild(select);
+        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'custom-select-btn'; btn.textContent = select.options[0].textContent;
         btn.addEventListener('click', () => {
           const opts = Array.from(select.options);
-          const title = select.dataset.placeholder || 'Selecione';
-          showPickerModal(title, opts, (val) => { select.value = val; btn.textContent = val || title; });
+          showPickerModal(select.dataset.placeholder || 'Selecione', opts, (val) => { select.value = val; btn.textContent = val || select.dataset.placeholder; });
         });
         wrapper.appendChild(btn);
       });
@@ -642,8 +532,7 @@
     }
 
     function showPickerModal(title, options, callback) {
-      const existing = document.getElementById('modal-picker-temp');
-      if (existing) existing.remove();
+      const existing = document.getElementById('modal-picker-temp'); if (existing) existing.remove();
       const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; overlay.id = 'modal-picker-temp'; overlay.style.zIndex = '5000';
       const modal = document.createElement('div'); modal.className = 'modal';
       modal.innerHTML = `<div class="modal-header"><span class="modal-icon">📋</span><h3>${title}</h3></div><div class="select-modal-content">${options.map(o => `<div class="select-option" data-value="${o.value}">${o.textContent}</div>`).join('')}</div>`;
@@ -690,11 +579,17 @@
       catch (e) { console.error('Erro ao carregar registros:', e); allRecords = []; }
     }
     async function saveRecord(data) {
-      const row = {}; row.dados = data.data; row.seuNome = data.seuNome; row.turno = data.turno; row.linha = data.linha;
-      row.produto = data.produto; row.embalagem = data.embalagem; row["máquina"] = data.funcao; row.savado_em = new Date().toISOString();
-      Object.entries(data.dyn).forEach(([key, value]) => { const col = FIELD_MAP[key] || key; row[col] = value; });
-      await sbFetch("/registros", { method: "POST", headers: { "Prefer": "return=representation" }, body: JSON.stringify(row) });
+      const row = {};
+      row.dados = data.data; row.seuNome = data.seuNome; row.turno = data.turno; row.linha = data.linha;
+      row.produto = data.produto; row.embalagem = data.embalagem; row.maquina = data.funcao; row.savado_em = new Date().toISOString();
+      Object.entries(data.dyn).forEach(([key, value]) => {
+        const col = FIELD_MAP[key] || key;
+        row[col] = (value === '' || value === undefined) ? null : Number(value);
+      });
+      const result = await sbFetch("/registros", { method: "POST", headers: { "Prefer": "return=representation" }, body: JSON.stringify(row) });
+      return result;
     }
+
     function clearErrorStyles() { document.querySelectorAll('.form-input.error, .custom-select-btn.error').forEach(el => el.classList.remove('error')); }
     function validateBasicFields() {
       clearErrorStyles();
@@ -758,10 +653,13 @@
       const data = document.getElementById('data').value, seuNome = document.getElementById('seu-nome').value.trim(), turno = document.getElementById('turno').value,
             linha = document.getElementById('linha').value, produto = document.getElementById('produto').value, embalagem = document.getElementById('embalagem').value, funcao = document.getElementById('funcao').value;
       const dyn = {}; document.querySelectorAll('#dynamic-sections input').forEach(i => { if (i.value) dyn[i.name || i.id] = i.value; });
-      try { await saveRecord({ data, seuNome, turno, linha, produto, embalagem, funcao, dyn }); await loadAllRecords(); showToast('Registro salvo! ✅');
+      try {
+        await saveRecord({ data, seuNome, turno, linha, produto, embalagem, funcao, dyn });
+        await loadAllRecords();
+        showToast('Registro salvo! ✅');
         document.getElementById('production-form').reset(); document.getElementById('data').value = new Date().toLocaleDateString('pt-BR');
         document.getElementById('dynamic-sections').innerHTML = '<p class="info-text">Selecione <strong>Linha</strong> e <strong>Máquina</strong></p>'; currentLinha = null; currentFuncao = null; buildCustomSelects();
-      } catch (e) { showToast('Erro ao salvar. Tente novamente.'); console.error(e); }
+      } catch (e) { showToast('Erro ao salvar: ' + e.message); console.error(e); }
     }
 
     function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 2500); }
@@ -781,14 +679,53 @@
 
     async function openDashboard() { document.getElementById('modal-dashboard').classList.remove('hidden'); await loadAllRecords(); applyFilters(); }
     function closeDashboard() { document.getElementById('modal-dashboard').classList.add('hidden'); }
-    function applyFilters() { const df = document.getElementById('filter-date').value, lf = document.getElementById('filter-linha').value; filteredRecords = allRecords.filter(r => { if (df && r.dados !== df) return false; if (lf && r.linha !== lf) return false; return true; }); document.getElementById('dashboard-stats-text').innerHTML = `<strong>${filteredRecords.length}</strong> registro(s)`; const tbody = document.getElementById('dashboard-tbody'), thead = document.getElementById('dashboard-thead'), empty = document.getElementById('dashboard-empty'); if (!filteredRecords.length) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; } empty.classList.add('hidden'); const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['dados','seuNome','turno','linha','produto','embalagem','máquina']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))]; thead.innerHTML = '<tr>' + ok.map(k => `<th>${k}</th>`).join('') + '</tr>'; tbody.innerHTML = filteredRecords.map(r => '<tr>' + ok.map(k => `<td>${r[k] || ''}</td>`).join('') + '</tr>').join(''); }
+    function applyFilters() { const df = document.getElementById('filter-date').value, lf = document.getElementById('filter-linha').value; filteredRecords = allRecords.filter(r => { if (df && r.dados !== df) return false; if (lf && r.linha !== lf) return false; return true; }); document.getElementById('dashboard-stats-text').innerHTML = `<strong>${filteredRecords.length}</strong> registro(s)`; const tbody = document.getElementById('dashboard-tbody'), thead = document.getElementById('dashboard-thead'), empty = document.getElementById('dashboard-empty'); if (!filteredRecords.length) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; } empty.classList.add('hidden'); const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['dados','seuNome','turno','linha','produto','embalagem','maquina']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))]; thead.innerHTML = '<tr>' + ok.map(k => `<th>${k}</th>`).join('') + '</tr>'; tbody.innerHTML = filteredRecords.map(r => '<tr>' + ok.map(k => `<td>${r[k] || ''}</td>`).join('') + '</tr>').join(''); }
     function clearFilters() { document.getElementById('filter-date').value = ''; document.getElementById('filter-linha').value = ''; buildCustomSelects(); applyFilters(); }
-    function toggleMyRecords() { const d = document.getElementById('my-records'); d.classList.toggle('hidden'); if (!d.classList.contains('hidden')) document.getElementById('records-list').innerHTML = allRecords.slice(0, 20).map(r => `<div class="record-item"><strong>${r.dados}</strong> — ${r.seuNome} — ${r.linha} — ${r["máquina"]} — ${r.produto}</div>`).join(''); }
-    function exportToExcel() { if (!filteredRecords.length) { showToast('Nenhum registro para exportar.'); return; } const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['dados','seuNome','turno','linha','produto','embalagem','máquina']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))]; let csv = ok.join(';') + '\n'; filteredRecords.forEach(r => { csv += ok.map(k => (r[k] !== undefined ? r[k] : '')).join(';') + '\n'; }); const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'corte_producao.csv'; a.click(); URL.revokeObjectURL(url); showToast('Exportado com sucesso!'); }
-    function openPasswordModal(action) { pendingPasswordAction = action; document.getElementById('modal-password-input').value = ''; document.getElementById('modal-password').classList.remove('hidden'); }
+    function toggleMyRecords() { const d = document.getElementById('my-records'); d.classList.toggle('hidden'); if (!d.classList.contains('hidden')) document.getElementById('records-list').innerHTML = allRecords.slice(0, 20).map(r => `<div class="record-item"><strong>${r.dados}</strong> — ${r.seuNome} — ${r.linha} — ${r.maquina || r["máquina"]} — ${r.produto}</div>`).join(''); }
+    function exportToExcel() { if (!filteredRecords.length) { showToast('Nenhum registro para exportar.'); return; } const keys = new Set(); filteredRecords.forEach(r => Object.keys(r).forEach(k => keys.add(k))); const pk = ['dados','seuNome','turno','linha','produto','embalagem','maquina']; const ok = [...pk.filter(k => keys.has(k)), ...Array.from(keys).filter(k => !pk.includes(k) && !['id','savado_em'].includes(k))]; let csv = ok.join(';') + '\n'; filteredRecords.forEach(r => { csv += ok.map(k => (r[k] !== undefined ? r[k] : '')).join(';') + '\n'; }); const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'corte_producao.csv'; a.click(); URL.revokeObjectURL(url); showToast('Exportado com sucesso!'); }
+
+    // ========== EXCLUSÃO POR SENHA (CORRIGIDA) ==========
+    function openPasswordModal(action) {
+      pendingPasswordAction = action;
+      document.getElementById('modal-password-input').value = '';
+      document.getElementById('modal-password').classList.remove('hidden');
+    }
     function closePasswordModal() { document.getElementById('modal-password').classList.add('hidden'); pendingPasswordAction = null; }
-    function confirmPasswordAction() { const senha = document.getElementById('modal-password-input').value; if (senha === '6033') { closePasswordModal(); if (pendingPasswordAction === 'clearOldRecords') clearOldRecords(); } else showToast('Senha incorreta!'); }
-    async function clearOldRecords() { try { const sixMonthsAgo = new Date(); sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6); const oldRecords = allRecords.filter(r => new Date(r.savado_em) < sixMonthsAgo); if (!oldRecords.length) { showToast('Nenhum registro com mais de 6 meses.'); return; } for (const r of oldRecords) { await sbFetch(`/registros?id=eq.${r.id}`, { method: 'DELETE' }); } await loadAllRecords(); applyFilters(); showToast(`${oldRecords.length} registro(s) removido(s)!`); } catch (e) { console.error('Erro ao limpar registros:', e); showToast('Erro ao remover registros.'); } }
+    function confirmPasswordAction() {
+      const senha = document.getElementById('modal-password-input').value;
+      if (senha === '6033') {
+        closePasswordModal();
+        if (pendingPasswordAction === 'clearOldRecords') {
+          clearOldRecords();
+        }
+      } else {
+        showToast('Senha incorreta!');
+      }
+    }
+    async function clearOldRecords() {
+      try {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const oldRecords = allRecords.filter(r => {
+          if (!r.savado_em) return false;
+          const date = new Date(r.savado_em);
+          return !isNaN(date) && date < sixMonthsAgo;
+        });
+        if (!oldRecords.length) {
+          showToast('Nenhum registro com mais de 6 meses.');
+          return;
+        }
+        for (const r of oldRecords) {
+          await sbFetch(`/registros?id=eq.${r.id}`, { method: 'DELETE' });
+        }
+        await loadAllRecords();
+        applyFilters();
+        showToast(`${oldRecords.length} registro(s) removido(s)!`);
+      } catch (e) {
+        console.error('Erro ao limpar registros:', e);
+        showToast('Erro ao remover: ' + (e.message || e));
+      }
+    }
 
     setTimeout(buildCameraButtons, 200);
   </script>
