@@ -345,22 +345,22 @@ const DB_HEADERS = { "Content-Type":"application/json","apikey":SUPABASE_ANON_KE
 // ── Photo slots config ────────────────────────────────────────────────────────
 const FOTOS_CONFIG = {
   L512: {
-    Enchedora:   [{ id:'enc-med',  label:'Enchedora + Medidor' }],
+    Enchedora:   [{ id:'enc',      label:'Enchedora' }, { id:'med', label:'Medidor de Vazão' }],
     Inspetores:  [{ id:'chk1',     label:'CHK 1' }, { id:'bbull1', label:'Bbull 1' }, { id:'chk2', label:'CHK 2' }, { id:'bbull2', label:'Bbull 2' }],
     Empacotadora:[{ id:'khs',      label:'KHS Pacotes' }],
-    Paletizadora:[{ id:'pl05',     label:'PL 05' }, { id:'pl06', label:'PL 06' }]
+    Paletizadora:[{ id:'pl05',     label:'PL 05' }, { id:'pl06', label:'PL 06' }, { id:'fracao512', label:'Fração' }]
   },
   L513: {
-    Enchedora:   [{ id:'enc-med',  label:'Enchedora + Medidor' }],
+    Enchedora:   [{ id:'enc',      label:'Enchedora' }, { id:'med', label:'Medidor de Vazão' }],
     Inspetores:  [{ id:'chk1',     label:'CHK 1' }, { id:'stratec1', label:'Stratec 1' }, { id:'chk2', label:'CHK 2' }, { id:'stratec2', label:'Stratec 2' }],
-    Empacotadora:[{ id:'khs',      label:'KHS Pacotes' }, { id:'epc34', label:'EPC Mead 3+4' }],
-    Paletizadora:[{ id:'pl09',     label:'PL 09' }, { id:'pl10', label:'PL 10' }, { id:'fracao', label:'Fração' }]
+    Empacotadora:[{ id:'khs',      label:'KHS Pacotes' }, { id:'epc3', label:'EPC Mead 3' }, { id:'epc4', label:'EPC Mead 4' }],
+    Paletizadora:[{ id:'pl09',     label:'PL 09' }, { id:'pl10', label:'PL 10' }, { id:'fracao513', label:'Fração' }]
   },
   L514: {
-    Enchedora:   [{ id:'enc-med',  label:'Enchedora + Medidor' }],
+    Enchedora:   [{ id:'enc',      label:'Enchedora' }, { id:'med', label:'Medidor de Vazão' }],
     Inspetores:  [{ id:'helf',     label:'Helf' }, { id:'bbull', label:'Bbull' }],
     Empacotadora:[{ id:'epc-mead', label:'EPC Mead' }, { id:'epc-pack', label:'EPC Packmatic' }],
-    Paletizadora:[{ id:'pl34f',    label:'PL 3 + PL 4 + Fração' }]
+    Paletizadora:[{ id:'pl3',      label:'PL 3' }, { id:'pl4', label:'PL 4' }, { id:'fracao514', label:'Fração' }]
   }
 };
 const MACHINE_ORDER = ['Enchedora','Inspetores','Empacotadora','Paletizadora'];
@@ -512,8 +512,43 @@ function selectCalDate(inputId, popId, d) {
 
 // ── Photo capture ─────────────────────────────────────────────────────────────
 function capturePhoto(slotId, slotLabel) {
+  showSourcePicker(slotId, slotLabel);
+}
+
+function showSourcePicker(slotId, slotLabel) {
+  const existing = document.getElementById('modal-source-picker');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'modal-source-picker';
+  overlay.className = 'modal-overlay';
+  overlay.style.zIndex = '3000';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:320px;text-align:center;">
+      <div class="modal-header" style="justify-content:center;margin-bottom:18px;">
+        <span class="modal-icon">📷</span>
+        <h3>${slotLabel}</h3>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn-primary" id="src-camera" style="padding:14px;font-size:15px;">📷 Câmera</button>
+        <button class="btn-secondary" id="src-gallery" style="padding:14px;font-size:15px;">🖼️ Galeria do Celular</button>
+        <button class="btn-secondary" id="src-cancel" style="padding:10px;font-size:13px;">Cancelar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('src-camera').addEventListener('click', () => {
+    overlay.remove(); triggerFileInput(slotId, slotLabel, true);
+  });
+  document.getElementById('src-gallery').addEventListener('click', () => {
+    overlay.remove(); triggerFileInput(slotId, slotLabel, false);
+  });
+  document.getElementById('src-cancel').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+function triggerFileInput(slotId, slotLabel, useCamera) {
   const fi = document.createElement('input');
-  fi.type = 'file'; fi.accept = 'image/*'; fi.capture = 'environment'; fi.style.display = 'none';
+  fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
+  if (useCamera) fi.capture = 'environment';
   document.body.appendChild(fi);
   fi.addEventListener('change', async e => {
     const file = e.target.files[0];
